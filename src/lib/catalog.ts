@@ -134,7 +134,7 @@ function legacyLink(href: string): string | null {
 
 const descTitle = /^о?писание( товара)?\s*:?$/i;
 
-export function cleanHtml(html: string, opts: { dropTitle?: boolean } = { dropTitle: true }): string {
+export function cleanHtml(html: string, opts: { dropTitle?: boolean; specs?: Spec[] } = { dropTitle: true }): string {
   const safe = sanitizeHtml(html || '', {
     allowedTags,
     allowedAttributes: { a: ['href'], td: ['colspan', 'rowspan'], th: ['colspan', 'rowspan'] },
@@ -153,7 +153,7 @@ export function cleanHtml(html: string, opts: { dropTitle?: boolean } = { dropTi
       },
     },
   });
-  return tidyLegacyHtml(safe, { dropTitle: opts.dropTitle ? descTitle : undefined });
+  return tidyLegacyHtml(safe, { dropTitle: opts.dropTitle ? descTitle : undefined, specs: opts.specs });
 }
 
 export function plain(html: string): string {

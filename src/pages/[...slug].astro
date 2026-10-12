@@ -75,7 +75,7 @@ const catDescription = category ? cleanHtml(category.description_html) : '';
 const related = product
   ? (categoryByUrl.get(primaryCategory(product) || '')?.products || []).filter((x) => x !== product!.url).slice(0, 4).map((x) => productByUrl.get(x)).filter(Boolean) as Product[]
   : [];
-const descHtml = product ? cleanHtml(product.description_html) : '';
+const descHtml = product ? cleanHtml(product.description_html, { dropTitle: true, specs: product.specs.flatMap((g) => g.fields) }) : '';
 
 // Small legacy photos are not stretched beyond 1.5x their natural size (the frame has 24px padding)
 const gallery = product

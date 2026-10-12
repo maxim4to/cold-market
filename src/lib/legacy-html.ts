@@ -227,6 +227,84 @@ const meaningful = (parent: ParentNode, fromEnd = false) => {
   return fromEnd ? kids[kids.length - 1] : kids[0];
 };
 
+// Spec label normalized for matching: "Охлаждаемый объём, л" -> "охлаждаемыйобъем"
+const SPEC_SYNONYMS: Record<string, string> = {
+  вес: 'масса', страна: 'странапроизводства', странапроизводитель: 'странапроизводства', страназначение: 'странапроизводства',
+  бренд: 'производитель', марка: 'производитель', торговаямарка: 'производитель', артикул: 'модель',
+};
+const specKey = (s: string) => {
+  const k = s.toLowerCase().replace(/ё/g, 'е').split(/[,:(]/)[0].replace(/[^a-zа-я0-9]/g, '');
+  return SPEC_SYNONYMS[k] ?? k;
+};
+const specValue = (s: string) => s.toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]/g, '');
+
+type SpecItem = { label: string; value: string; nodes: AnyNode[] };
+
+// Label/value items of a spec-like block; null for anything else (e.g. multi-column comparison tables)
+function specItems(el: Element): SpecItem[] | null {
+  if (el.name === 'table') {
+    const rows = DomUtils.findAll((e) => e.name === 'tr', el.children);
+    const cells = (tr: Element) => els(tr.children, (c) => c.name === 'td' || c.name === 'th');
+    const pairs = rows.filter((tr) => cells(tr).length === 2);
+    if (!rows.length || pairs.length / rows.length < 0.7) return null;
+    return pairs.map((tr) => ({ label: textOf(cells(tr)[0]), value: textOf(cells(tr)[1]), nodes: [tr] }));
+  }
+  if (el.name === 'dl') {
+    const items: SpecItem[] = [];
+    for (const c of el.children) {
+      if (isEl(c) && c.name === 'dt') items.push({ label: textOf(c), value: '', nodes: [c] });
+      else if (items.length) {
+        items[items.length - 1].nodes.push(c);
+        if (isEl(c) && c.name === 'dd') items[items.length - 1].value += textOf(c);
+      }
+    }
+    return items;
+  }
+  const lis = els(el.children, 'li');
+  const pairs = lis.filter((li) => !hasBlock(li) && textOf(li).includes(':'));
+  if (!lis.length || pairs.length / lis.length < 0.7) return null;
+  return pairs.map((li) => { const [label, ...rest] = textOf(li).split(':'); return { label, value: rest.join(':'), nodes: [li] }; });
+}
+
+// Rows of description tables/lists that repeat the product's own spec block are removed;
+// rows with extra information stay. A block left without real rows goes away entirely.
+function dropSpecDuplicates(root: ParentNode, specs: { name: string; value: string }[]) {
+  const keys = new Set(specs.map((f) => specKey(f.name)).filter((k) => k.length >= 3));
+  // numbers are too ambiguous to match by value alone ("10" kg vs "10" l); text values like a country or brand are not
+  const textValues = new Set(specs.map((f) => specValue(f.value)).filter((v) => v.length >= 3 && /[a-zа-я]/.test(v)));
+  if (keys.size < 2) return;
+  const matches = (i: SpecItem) => {
+    const k = specKey(i.label);
+    if (k.length >= 3 && [...keys].some((s) => s === k || s.startsWith(k) || k.startsWith(s))) return true;
+    return textValues.has(specValue(i.value));
+  };
+  for (const el of els(root.children, (e) => ['table', 'ul', 'ol', 'dl'].includes(e.name))) {
+    if (hasAncestor(el, ['table', 'ul', 'ol'])) continue;
+    const items = specItems(el);
+    if (!items || items.length < 2) continue;
+    const dup = items.filter(matches);
+    if (dup.length < 2) continue;
+    if (items.length - dup.length < 2) remove(el);
+    else dup.forEach((i) => i.nodes.forEach(remove));
+  }
+}
+
+// First meaningful node, looking through wrapper divs
+function leadingNode(n: AnyNode | undefined): AnyNode | undefined {
+  while (isEl(n) && n.name === 'div') n = meaningful(n);
+  return n;
+}
+
+// Headings that ended up with no content under them (followed by another heading or nothing)
+function dropEmptySections(root: ParentNode) {
+  for (const h of els(root.children, (e) => e.name === 'h3' || e.name === 'h4')) {
+    let next = h.next;
+    while (next && (blankNode(next) || (isEl(next) && blank(textOf(next))))) next = next.next;
+    const lead = leadingNode(next);
+    if (!next || (isEl(lead) && (lead.name === 'h3' || lead.name === 'h4'))) remove(h);
+  }
+}
+
 // The page already has its own "Описание" heading
 function dropLeadingTitle(root: ParentNode, pattern: RegExp) {
   let parent: ParentNode = root;
@@ -293,7 +371,7 @@ function wrapLooseText(root: ParentNode) {
   setChildren(root, out);
 }
 
-export function tidyLegacyHtml(html: string, opts: { dropTitle?: RegExp } = {}): string {
+export function tidyLegacyHtml(html: string, opts: { dropTitle?: RegExp; specs?: { name: string; value: string }[] } = {}): string {
   const doc = parseDocument(html);
   const texts: Text[] = [];
   (function collect(n: AnyNode) {
@@ -306,6 +384,11 @@ export function tidyLegacyHtml(html: string, opts: { dropTitle?: RegExp } = {}):
   tidyElements(doc);
   tidyTables(doc);
   promoteHeadings(doc);
+  if (opts.specs?.length) {
+    dropSpecDuplicates(doc, opts.specs);
+    tidyElements(doc);
+    dropEmptySections(doc);
+  }
   if (opts.dropTitle) dropLeadingTitle(doc, opts.dropTitle);
   unwrapLayoutLists(doc);
   dropTrailingLabels(doc);
