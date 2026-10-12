@@ -1,7 +1,10 @@
 ---
 import { u, abs } from '../lib/url';
+import Icon from './Icon.astro';
 interface Props { items: { url: string; name: string }[] }
 const items = [{ url: '/', name: 'Главная' }, ...Astro.props.items];
+// phones get one line: a link back to the parent section
+const parent = items.length > 2 ? items[items.length - 2] : null;
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -9,11 +12,16 @@ const ld = {
 };
 ---
 <nav aria-label="Хлебные крошки" class="text-[13px] text-muted">
-  <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+  {parent && (
+    <a href={u(parent.url)} class="-my-2 flex min-h-10 items-center gap-1.5 font-semibold text-ink-soft sm:hidden">
+      <Icon name="arrow" class="h-4 w-4 shrink-0 rotate-180 text-brand-deep" /><span class="truncate">{parent.name}</span>
+    </a>
+  )}
+  <ol class={`${parent ? 'hidden sm:flex' : 'flex'} flex-wrap items-center gap-x-1.5 gap-y-1`}>
     {items.map((i, n) => (
       <li class="flex items-center gap-1.5">
         {n > 0 && <span aria-hidden="true" class="text-line">/</span>}
-        {n < items.length - 1 ? <a href={u(i.url)} class="hover:text-brand-deep">{i.name}</a> : <span class="text-ink-soft" aria-current="page">{i.name}</span>}
+        {n < items.length - 1 ? <a href={u(i.url)} class="py-1 hover:text-brand-deep">{i.name}</a> : <span class="text-ink-soft" aria-current="page">{i.name}</span>}
       </li>
     ))}
   </ol>

@@ -5,16 +5,10 @@ import ContactCta from '../components/ContactCta.astro';
 import MapBlock from '../components/MapBlock.astro';
 import Icon from '../components/Icon.astro';
 import ServiceMedia from '../components/ServiceMedia.astro';
-import { topCategories, categoryByUrl, products, localImage } from '../lib/catalog';
+import { topCatalogLinks, products } from '../lib/catalog';
 import { company, services } from '../lib/site';
 import { u } from '../lib/url';
 
-const count = (url: string): number => {
-  const c = categoryByUrl.get(url);
-  if (!c) return 0;
-  return c.products.length + c.subcategories.filter((s) => s.url !== url).reduce((a, s) => a + count(s.url), 0);
-};
-const counts = new Map(topCategories.map((c) => [c.url, count(c.url)]));
 const advantages = [
   { icon: 'box', title: 'Склад в Твери', text: 'Постоянные складские запасы — оснастим объект без долгого ожидания.' },
   { icon: 'truck', title: 'Доставка и монтаж', text: 'Привезём, установим и запустим оборудование, обучим персонал.' },
@@ -66,7 +60,7 @@ const advantages = [
       <p class="max-w-md text-sm text-muted">Цены ознакомительные — актуальную стоимость и наличие подскажет менеджер.</p>
     </div>
     <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
-      {topCategories.map((c) => <CategoryTile url={c.url} name={c.name} image={c.image} count={counts.get(c.url)} />)}
+      {topCatalogLinks.map((c) => <CategoryTile url={c.url} name={c.name} image={c.image} count={c.count} />)}
     </div>
   </section>
 
@@ -107,7 +101,7 @@ const advantages = [
     </div>
   </section>
 
-  <section class="container-x grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+  <section class="container-x grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-start">
     <ContactCta title="Подберём оборудование под ваш объект" text="Позвоните или напишите в мессенджер — расскажем о наличии, ценах, доставке и монтаже." />
     <MapBlock />
   </section>

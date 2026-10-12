@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+---
+<dialog id="lightbox" class="fixed inset-0 m-auto h-fit max-h-none w-fit max-w-none overflow-visible bg-transparent p-0 backdrop:bg-ink/85" aria-label="Просмотр фото">
+  <img alt="" class="block max-h-[88vh] max-w-[94vw] rounded-xl bg-white object-contain p-2" />
+  <button type="button" class="absolute -top-3 -right-3 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow-lg hover:text-brand-deep" aria-label="Закрыть"><Icon name="close" class="h-5 w-5" /></button>
+</dialog>
+<script is:inline>
+  // Links marked data-lightbox open their image in the dialog instead of navigating to the raw file
+  (function () {
+    var d = document.getElementById('lightbox');
+    if (!d || !d.showModal) return;
+    var img = d.querySelector('img');
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[data-lightbox]');
+      if (!a || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      var src = a.querySelector('img');
+      img.src = a.href;
+      img.alt = src ? src.alt : '';
+      d.showModal();
+    });
+    d.addEventListener('click', function () { d.close(); });
+    d.addEventListener('close', function () { img.removeAttribute('src'); });
+  })();
+</script>

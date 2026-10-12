@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import sanitizeHtml from 'sanitize-html';
+import sharp from 'sharp';
+import { tidyLegacyHtml, innerHtmlOf } from './legacy-html';
+import { u } from './url';
 
 export type Spec = { name: string; value: string };
 export type SpecGroup = { group: string; fields: Spec[] };
@@ -109,26 +112,48 @@ export function originalImage(src: string): string {
 
 const allowedTags = [
   'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'sup', 'sub', 'ul', 'ol', 'li', 'h2', 'h3', 'h4',
-  'table', 'thead', 'tbody', 'tr', 'td', 'th', 'dl', 'dt', 'dd', 'span', 'div', 'a', 'nobr',
+  'table', 'thead', 'tbody', 'tr', 'td', 'th', 'dl', 'dt', 'dd', 'span', 'div', 'a', 'x-h',
 ];
 
-export function cleanHtml(html: string): string {
-  return sanitizeHtml(html || '', {
+const staticPages = new Set(['/', '/about.html', '/kontakty.html', '/services.html']);
+const knownPage = (p: string) =>
+  staticPages.has(p) || productByUrl.has(p) || categoryByUrl.has(p) || p in infoPages ||
+  (p.startsWith('/img/') && fs.existsSync(path.join(publicDir, p)));
+
+// Links of the old site: keep the ones that lead to a page of this site (with the base path),
+// turn the rest (other sites, dead files like /images/prices/price.xls) into plain text.
+function legacyLink(href: string): string | null {
+  if (/^(mailto|tel):/.test(href)) return href;
+  let p = href.trim().replace(/^https?:\/\/(www\.)?coldmarket-tver\.ru/i, '');
+  if (!p || /^[a-z]+:|^\/\/|^#/i.test(p)) return null;
+  if (!p.startsWith('/')) p = '/' + p;
+  const [pathname, hash = ''] = p.split('#');
+  const clean = decodeURI(pathname.split('?')[0]);
+  return knownPage(clean) ? u(clean) + (hash ? '#' + hash : '') : null;
+}
+
+const descTitle = /^о?писание( товара)?\s*:?$/i;
+
+export function cleanHtml(html: string, opts: { dropTitle?: boolean } = { dropTitle: true }): string {
+  const safe = sanitizeHtml(html || '', {
     allowedTags,
     allowedAttributes: { a: ['href'], td: ['colspan', 'rowspan'], th: ['colspan', 'rowspan'] },
     transformTags: {
       // old descriptions use h2 for minor headings; demote so the page keeps one clear outline
+      h1: 'h3',
       h2: 'h3',
+      h5: 'h4',
+      h6: 'h4',
+      nobr: 'span',
+      // big-font divs were used as headings; tidyLegacyHtml decides by their text
+      div: (tagName, attribs) => ({ tagName: /font-size:\s*(2\d|[3-9]\d)px/.test(attribs.style || '') ? 'x-h' : 'div', attribs: {} }),
       a: (tagName, attribs) => {
-        const href = attribs.href || '';
-        const external = /^https?:/.test(href) && !href.includes('coldmarket-tver.ru');
-        return { tagName: external ? 'span' : 'a', attribs: external ? {} : { href: href.replace(SRC_HOST, '') } };
+        const href = legacyLink(attribs.href || '');
+        return href ? { tagName: 'a', attribs: { href } } : { tagName: 'span', attribs: {} };
       },
     },
-    exclusiveFilter: (frame) => ['p', 'span', 'div'].includes(frame.tag) && !frame.text.trim() && !frame.mediaChildren?.length,
-  })
-    .replace(/(&nbsp;|\s)+(<\/p>)/g, '$2')
-    .replace(/(<br \/>\s*){3,}/g, '<br /><br />');
+  });
+  return tidyLegacyHtml(safe, { dropTitle: opts.dropTitle ? descTitle : undefined });
 }
 
 export function plain(html: string): string {
@@ -141,13 +166,9 @@ export const infoPages: Record<string, InfoPage> = load('pages.json');
 export function infoContent(url: string): string {
   const p = infoPages[url];
   if (!p) return '';
-  return sanitizeHtml(p.content_html, {
-    allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'h2', 'h3', 'h4', 'table', 'thead', 'tbody', 'tr', 'td', 'th'],
-    allowedAttributes: { td: ['colspan', 'rowspan'], th: ['colspan', 'rowspan'] },
-    exclusiveFilter: (frame) => ['p', 'li'].includes(frame.tag) && !frame.text.trim(),
-  })
-    .replace(/<li>\s*<p>([\s\S]*?)<\/p>\s*<\/li>/g, '<li>$1</li>')
-    .replace(/<p>\s*<br \/>/g, '<p>');
+  // the legacy wrapper also holds the old <h1>, which would repeat the page title as plain text
+  const body = innerHtmlOf(p.content_html, (a) => a.itemprop === 'articleBody') ?? p.content_html;
+  return cleanHtml(body, { dropTitle: false });
 }
 
 export function infoImages(url: string): string[] {
@@ -185,4 +206,67 @@ export function framedStyle(src: string | null | undefined, frameAspect = 1): st
     `left:${pct((frameAspect / 2 - (b.x + b.w / 2) * b.a * s) / frameAspect)}`,
     `top:${pct(0.5 - (b.y + b.h / 2) * s)}`,
   ].join(';');
+}
+
+// Products of a category and all its subcategories (unique, existing pages only)
+const productSets = new Map<string, Set<string>>();
+export function categoryProductUrls(url: string, seen = new Set<string>()): Set<string> {
+  const cached = productSets.get(url);
+  if (cached) return cached;
+  seen.add(url);
+  const c = categoryByUrl.get(url);
+  const set = new Set((c?.products || []).filter((p) => productByUrl.has(p)));
+  for (const s of c?.subcategories || []) {
+    if (!seen.has(s.url)) for (const p of categoryProductUrls(s.url, seen)) set.add(p);
+  }
+  productSets.set(url, set);
+  return set;
+}
+export const productCount = (url: string) => categoryProductUrls(url).size;
+
+export function plural(n: number, [one, few, many]: [string, string, string]): string {
+  const d = n % 10, h = n % 100;
+  return d === 1 && h !== 11 ? one : d >= 2 && d <= 4 && (h < 12 || h > 14) ? few : many;
+}
+export const productsLabel = (n: number) => `${n} ${plural(n, ['товар', 'товара', 'товаров'])}`;
+
+// The old "Ремонт оборудования" catalog section is empty; the service page is the useful target.
+// Its category page is still built so the old URL keeps working.
+const categoryLinkOverrides: Record<string, string> = { '/remont-oborudovaniya.html': '/services/ro.html' };
+export type CatalogLink = { url: string; name: string; image: string | null; count: number };
+export function catalogLinks(list: { url: string; name: string; image: string | null }[]): CatalogLink[] {
+  return list.flatMap((c) => {
+    const override = categoryLinkOverrides[c.url];
+    const count = productCount(c.url);
+    if (override) return [{ ...c, url: override, count: 0 }];
+    return count > 0 ? [{ ...c, count }] : [];
+  });
+}
+export const topCatalogLinks = catalogLinks(topCategories);
+
+// Display-only clean-up of spec values: "+" / "-" flags and empty rows
+export function specFields(fields: Spec[]): Spec[] {
+  return fields
+    .map((f) => {
+      const v = (f.value || '').trim();
+      return { name: (f.name || '').trim(), value: v === '+' ? 'есть' : /^[-–—]$/.test(v) ? 'нет' : v };
+    })
+    .filter((f) => f.name && f.value);
+}
+
+// Keeps short tokens like "б/у" from breaking at the slash
+export const noBreakSlash = (s: string) => s.replace(/(^|[\s(«"])([^\s/]{1,3})\/([^\s/]{1,3})(?=$|[\s,.()»"])/g, '$1$2/\u2060$3');
+
+const sizeCache = new Map<string, Promise<{ width: number; height: number } | null>>();
+// Natural size of a local /img/... file (null for remote or unknown images)
+export function imageSize(src: string | null | undefined): Promise<{ width: number; height: number } | null> {
+  if (!src || !src.startsWith('/img/')) return Promise.resolve(null);
+  let p = sizeCache.get(src);
+  if (!p) {
+    p = sharp(path.join(publicDir, src)).metadata()
+      .then((m) => (m.width && m.height ? { width: m.width, height: m.height } : null))
+      .catch(() => null);
+    sizeCache.set(src, p);
+  }
+  return p;
 }

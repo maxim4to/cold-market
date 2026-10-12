@@ -2,14 +2,20 @@
 import Base from '../layouts/Base.astro';
 import Breadcrumbs from './Breadcrumbs.astro';
 import ContactCta from './ContactCta.astro';
-import { infoPages, infoContent, infoImages, localImage } from '../lib/catalog';
+import Lightbox from './Lightbox.astro';
+import { infoPages, infoContent, infoImages, localImage, imageSize } from '../lib/catalog';
 import { u } from '../lib/url';
 interface Props { url: string; h1?: string; crumbs?: { url: string; name: string }[]; description?: string; showImages?: boolean; eyebrow?: string }
 const { url, crumbs = [], showImages = true, eyebrow } = Astro.props;
 const page = infoPages[url];
 const h1 = Astro.props.h1 || page.h1;
 const html = infoContent(url);
-const images = showImages ? infoImages(url) : [];
+const images = await Promise.all((showImages ? infoImages(url) : []).map(async (src) => {
+  const local = localImage(src)!;
+  return { src: local, size: await imageSize(local) };
+}));
+// certificates are portrait scans: show them whole, never upscaled past their natural size
+const portrait = images.filter((i) => i.size && i.size.height > i.size.width).length > images.length / 2;
 const description = Astro.props.description || page.meta_description;
 ---
 <Base title={page.title} description={description} canonical={url}>
@@ -17,7 +23,7 @@ const description = Astro.props.description || page.meta_description;
     <div class="container-x py-5"><Breadcrumbs items={[...crumbs, { url, name: h1 }]} /></div>
     <div class="container-x pb-10 pt-4">
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-      <h1 class="mt-2 text-3xl font-extrabold tracking-tight md:text-5xl">{h1}</h1>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight break-words hyphens-auto md:text-5xl">{h1}</h1>
     </div>
   </div>
   <div class="container-x grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -26,10 +32,15 @@ const description = Astro.props.description || page.meta_description;
       <div class="prose-cm max-w-3xl text-base" set:html={html} />
       {images.length > 0 && (
         <div class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3">
-          {images.map((src) => <img src={u(localImage(src)!)} alt={h1} loading="lazy" class="card aspect-[4/3] w-full object-cover" />)}
+          {images.map((im) => (
+            <a href={u(im.src)} data-lightbox class={`card grid cursor-zoom-in place-items-center overflow-hidden p-3 ${portrait ? 'aspect-[3/4]' : 'aspect-[4/3]'}`}>
+              <img src={u(im.src)} alt={h1} loading="lazy" width={im.size?.width} height={im.size?.height} style={im.size ? `max-width:min(100%,${im.size.width}px)` : undefined} class="h-auto max-h-full w-auto object-contain" />
+            </a>
+          ))}
         </div>
       )}
       <slot />
+      {images.length > 0 && <Lightbox />}
     </div>
     <aside class="lg:sticky lg:top-28 lg:self-start">
       <ContactCta title="Нужна консультация?" text="Расскажите о задаче — подберём решение, рассчитаем стоимость и сроки." />

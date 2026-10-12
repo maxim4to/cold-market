@@ -4,8 +4,8 @@ const { lat, lon } = company.geo;
 const src = `https://yandex.ru/map-widget/v1/?ll=${lon}%2C${lat}&z=16&pt=${lon}%2C${lat}%2Cpm2blm`;
 const route = `https://yandex.ru/maps/?rtext=~${lat}%2C${lon}&rtt=auto`;
 ---
-<div class="card overflow-hidden">
-  <iframe src={src} title="ХолодМаркет на карте" loading="lazy" class="block h-[360px] w-full md:h-[440px]" allowfullscreen></iframe>
+<div class="card flex flex-col overflow-hidden">
+  <iframe src={src} title="ХолодМаркет на карте" loading="lazy" class="block min-h-[360px] w-full flex-1 md:min-h-[440px]" allowfullscreen></iframe>
   <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line p-4">
     <span class="text-sm font-semibold">{company.address.full}</span>
     <a href={route} target="_blank" rel="noopener" data-goal="click_route" class="btn-ghost py-2">Построить маршрут</a>
