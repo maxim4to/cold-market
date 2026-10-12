@@ -4,6 +4,7 @@ import CategoryTile from '../components/CategoryTile.astro';
 import ContactCta from '../components/ContactCta.astro';
 import MapBlock from '../components/MapBlock.astro';
 import Icon from '../components/Icon.astro';
+import ServiceMedia from '../components/ServiceMedia.astro';
 import { topCategories, categoryByUrl, products, localImage } from '../lib/catalog';
 import { company, services } from '../lib/site';
 import { u } from '../lib/url';
@@ -96,7 +97,7 @@ const advantages = [
     <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {services.map((s) => (
         <a href={u(s.href)} class="group card overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
-          <img src={u(localImage(s.image)!)} alt={s.title} loading="lazy" class="aspect-[16/10] w-full object-cover" />
+          <ServiceMedia image={s.image} video={(s as { video?: string }).video} alt={s.title} class="aspect-[16/10] w-full" />
           <div class="p-5">
             <p class="font-extrabold group-hover:text-brand-deep">{s.title}</p>
             <p class="mt-1.5 text-sm text-ink-soft">{s.short}</p>

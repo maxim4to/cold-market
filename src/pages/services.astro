@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import ContactCta from '../components/ContactCta.astro';
 import Icon from '../components/Icon.astro';
+import ServiceMedia from '../components/ServiceMedia.astro';
 import { services } from '../lib/site';
 import { localImage } from '../lib/catalog';
 import { u } from '../lib/url';
@@ -20,7 +21,7 @@ import { u } from '../lib/url';
     <div class="grid gap-4 sm:grid-cols-2">
       {services.map((s) => (
         <a href={u(s.href)} class="group card flex overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
-          <img src={u(localImage(s.image)!)} alt={s.title} loading="lazy" class="w-32 shrink-0 object-cover sm:w-44" />
+          <ServiceMedia image={s.image} video={(s as { video?: string }).video} alt={s.title} class="w-32 shrink-0 self-stretch sm:w-44" />
           <div class="flex flex-col p-5">
             <span class="text-lg font-extrabold group-hover:text-brand-deep">{s.title}</span>
             <span class="mt-1 text-sm text-ink-soft">{s.short}</span>

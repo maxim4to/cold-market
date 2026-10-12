@@ -1,0 +1,15 @@
+---
+import { localImage } from '../lib/catalog';
+import { u } from '../lib/url';
+interface Props { image: string; video?: string; alt: string; class?: string }
+const { image, video, alt, class: cls = '' } = Astro.props;
+const poster = u(localImage(image)!);
+---
+{video ? (
+  <span class={`relative block overflow-hidden ${cls}`}>
+    <video src={u(video)} poster={poster} autoplay muted loop playsinline preload="metadata" aria-label={alt} class="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"></video>
+    <img src={poster} alt={alt} loading="lazy" class="absolute inset-0 hidden h-full w-full object-cover motion-reduce:block" />
+  </span>
+) : (
+  <img src={poster} alt={alt} loading="lazy" class={`object-cover ${cls}`} />
+)}

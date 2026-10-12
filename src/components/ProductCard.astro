@@ -1,11 +1,12 @@
 ---
-import { localImage, allLabels, displayPrice, type Product } from '../lib/catalog';
+import { localImage, allLabels, displayPrice, framedStyle, type Product } from '../lib/catalog';
 import { u } from '../lib/url';
 import Icon from './Icon.astro';
 interface Props { product: Product }
 const { product: p } = Astro.props;
 const img = localImage(p.images[0]?.thumb || p.images[0]?.medium, 'thumb');
 const labels = allLabels(p);
+const frame = framedStyle(p.images[0]?.full);
 const keySpecs = p.specs.flatMap((g) => g.fields).filter((f) => !/^(Модель|Производитель|Страна)/.test(f.name)).slice(0, 3);
 ---
 <a href={u(p.url)} class="group card relative flex flex-col overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
@@ -14,8 +15,10 @@ const keySpecs = p.specs.flatMap((g) => g.fields).filter((f) => !/^(Модель
       {labels.map((l) => <span class={`rounded-md px-2 py-0.5 text-[11px] font-bold text-white ${l === 'Sale' ? 'bg-sale' : 'bg-ok'}`}>{l === 'Sale' ? 'Скидка' : l}</span>)}
     </div>
   )}
-  <div class="relative grid aspect-square place-items-center bg-white">
-    {img ? <img src={u(img)} alt={p.name} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-contain p-4 transition group-hover:scale-[1.03]" /> : <Icon name="box" class="h-12 w-12 text-line" />}
+  <div class="relative grid aspect-square place-items-center overflow-hidden bg-white">
+    {img && frame && <img src={u(img)} alt={p.name} loading="lazy" decoding="async" style={frame} class="absolute max-w-none transition group-hover:scale-[1.03]" />}
+    {img && !frame && <img src={u(img)} alt={p.name} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-contain p-4 transition group-hover:scale-[1.03]" />}
+    {!img && <Icon name="box" class="h-12 w-12 text-line" />}
   </div>
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">
     {p.manufacturer && <span class="text-[11px] font-bold uppercase tracking-wider text-muted">{p.manufacturer}</span>}

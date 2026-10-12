@@ -46,7 +46,8 @@ export const services = [
     href: '/services/project.html',
     title: 'Проектирование',
     short: 'Планировка торгового зала и подбор оборудования под ваш формат.',
-    image: '/images/Drawing1.png',
+    image: '/img/gen/service-project.webp',
+    video: '/video/service-project.mp4',
   },
   {
     href: '/services/montaz.html',

@@ -160,3 +160,25 @@ export function displayPrice(price: string | null): string {
   const n = priceNumber(price);
   return !n || n <= 1 ? 'Цена по запросу' : price!;
 }
+
+type Box = { x: number; y: number; w: number; h: number; a: number };
+const boxesPath = path.join(dataDir, 'image-boxes.json');
+const imageBoxes: Record<string, Box> = fs.existsSync(boxesPath) ? JSON.parse(fs.readFileSync(boxesPath, 'utf-8')) : {};
+const FILL = 0.88;
+
+// Inline style that zooms a product photo inside a square frame so the product's longer side takes
+// FILL of the frame, using the box measured by scripts/build-images.mjs. Null when no box is known.
+export function framedStyle(src: string | null | undefined): string | null {
+  if (!src) return null;
+  const m = decodeURIComponent(src).match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/);
+  const b = m && imageBoxes[`p/${m[1]}`];
+  if (!b) return null;
+  const s = FILL / Math.max(b.w * b.a, b.h);
+  const pct = (v: number) => `${(v * 100).toFixed(2)}%`;
+  return [
+    `width:${pct(b.a * s)}`,
+    `height:${pct(s)}`,
+    `left:${pct(0.5 - (b.x + b.w / 2) * b.a * s)}`,
+    `top:${pct(0.5 - (b.y + b.h / 2) * s)}`,
+  ].join(';');
+}
