@@ -1,14 +1,17 @@
 ---
-import { localImage } from '../lib/catalog';
+import { localImage, framedStyle } from '../lib/catalog';
 import { u } from '../lib/url';
 import Icon from './Icon.astro';
 interface Props { url: string; name: string; image: string | null; count?: number }
 const { url, name, image, count } = Astro.props;
 const img = localImage(image);
+const frame = framedStyle(image, 4 / 3);
 ---
 <a href={u(url)} class="group card flex flex-col overflow-hidden transition hover:-translate-y-0.5 hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
-  <div class="relative grid aspect-[4/3] place-items-center bg-gradient-to-b from-frost to-ice">
-    {img ? <img src={u(img)} alt={name} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-contain p-4 mix-blend-multiply transition group-hover:scale-[1.03]" /> : <Icon name="snow" class="h-12 w-12 text-brand/40" />}
+  <div class="relative grid aspect-[4/3] place-items-center overflow-hidden bg-gradient-to-b from-frost to-ice">
+    {img && frame && <img src={u(img)} alt={name} loading="lazy" decoding="async" style={frame} class="absolute max-w-none mix-blend-multiply transition group-hover:scale-[1.03]" />}
+    {img && !frame && <img src={u(img)} alt={name} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-contain p-4 mix-blend-multiply transition group-hover:scale-[1.03]" />}
+    {!img && <Icon name="snow" class="h-12 w-12 text-brand/40" />}
   </div>
   <div class="flex items-center justify-between gap-2 border-t border-line px-4 py-3">
     <span class="text-[15px] font-bold leading-snug">{name}</span>

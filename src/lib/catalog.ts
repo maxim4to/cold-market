@@ -166,19 +166,23 @@ const boxesPath = path.join(dataDir, 'image-boxes.json');
 const imageBoxes: Record<string, Box> = fs.existsSync(boxesPath) ? JSON.parse(fs.readFileSync(boxesPath, 'utf-8')) : {};
 const FILL = 0.88;
 
-// Inline style that zooms a product photo inside a square frame so the product's longer side takes
-// FILL of the frame, using the box measured by scripts/build-images.mjs. Null when no box is known.
-export function framedStyle(src: string | null | undefined): string | null {
+// Inline style that zooms a photo inside a frame of the given aspect ratio (width / height) so the
+// product's box fits FILL of the frame, using boxes measured by scripts/build-images.mjs.
+// Null when no box is known for the image.
+export function framedStyle(src: string | null | undefined, frameAspect = 1): string | null {
   if (!src) return null;
-  const m = decodeURIComponent(src).match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/);
-  const b = m && imageBoxes[`p/${m[1]}`];
+  const path = decodeURIComponent(src);
+  const m = path.match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/);
+  const c = path.match(/img_categories\/([^/]+)\.\w+$/);
+  const b = m ? imageBoxes[`p/${m[1]}`] : c ? imageBoxes[`c/${c[1]}`] : undefined;
   if (!b) return null;
-  const s = FILL / Math.max(b.w * b.a, b.h);
+  // frame height = 1, frame width = frameAspect, image height = s, image width = b.a * s
+  const s = FILL * Math.min(frameAspect / (b.w * b.a), 1 / b.h);
   const pct = (v: number) => `${(v * 100).toFixed(2)}%`;
   return [
-    `width:${pct(b.a * s)}`,
+    `width:${pct((b.a * s) / frameAspect)}`,
     `height:${pct(s)}`,
-    `left:${pct(0.5 - (b.x + b.w / 2) * b.a * s)}`,
+    `left:${pct((frameAspect / 2 - (b.x + b.w / 2) * b.a * s) / frameAspect)}`,
     `top:${pct(0.5 - (b.y + b.h / 2) * s)}`,
   ].join(';');
 }
