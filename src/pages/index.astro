@@ -6,6 +6,8 @@ import MapBlock from '../components/MapBlock.astro';
 import Icon from '../components/Icon.astro';
 import ServiceMedia from '../components/ServiceMedia.astro';
 import { topCatalogLinks, products } from '../lib/catalog';
+
+const SALE_URL = '/rasprodazha.html';
 import { company, services } from '../lib/site';
 import { u } from '../lib/url';
 
@@ -60,7 +62,7 @@ const advantages = [
       <p class="max-w-md text-sm text-muted">Цены ознакомительные — актуальную стоимость и наличие подскажет менеджер.</p>
     </div>
     <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
-      {topCatalogLinks.map((c) => <CategoryTile url={c.url} name={c.name} image={c.image} count={c.count} />)}
+      {[...topCatalogLinks].sort((a, b) => Number(a.url === SALE_URL) - Number(b.url === SALE_URL)).map((c) => <CategoryTile url={c.url} name={c.name} image={c.image} count={c.count} ribbon={c.url === SALE_URL ? 'SALE' : undefined} />)}
     </div>
   </section>
 

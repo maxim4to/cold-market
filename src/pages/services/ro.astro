@@ -1,4 +1,15 @@
 ---
 import InfoLayout from '../../components/InfoLayout.astro';
+import { categoryByUrl, cleanHtml } from '../../lib/catalog';
+
+// The old catalog had this service only as a "Лари универсальные (переделка)" category
+const conversion = cleanHtml(categoryByUrl.get('/lari-universalnye2.html')?.description_html ?? '', { dropTitle: false });
 ---
-<InfoLayout url="/services/ro.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]} />
+<InfoLayout url="/services/ro.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]}>
+  {conversion && (
+    <section class="mt-10 max-w-3xl">
+      <h2 class="text-xl font-extrabold">Переделка морозильных ларей</h2>
+      <div class="prose-cm mt-3 text-base" set:html={conversion} />
+    </section>
+  )}
+</InfoLayout>

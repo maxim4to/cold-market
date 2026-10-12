@@ -230,15 +230,12 @@ export function plural(n: number, [one, few, many]: [string, string, string]): s
 }
 export const productsLabel = (n: number) => `${n} ${plural(n, ['товар', 'товара', 'товаров'])}`;
 
-// The old "Ремонт оборудования" catalog section is empty; the service page is the useful target.
-// Its category page is still built so the old URL keeps working.
-const categoryLinkOverrides: Record<string, string> = { '/remont-oborudovaniya.html': '/services/ro.html' };
 export type CatalogLink = { url: string; name: string; image: string | null; count: number };
+// Sections without products (e.g. the old "Ремонт оборудования", now a service page) are not linked;
+// their pages are still built so old URLs keep working
 export function catalogLinks(list: { url: string; name: string; image: string | null }[]): CatalogLink[] {
   return list.flatMap((c) => {
-    const override = categoryLinkOverrides[c.url];
     const count = productCount(c.url);
-    if (override) return [{ ...c, url: override, count: 0 }];
     return count > 0 ? [{ ...c, count }] : [];
   });
 }
