@@ -41,9 +41,9 @@ const advantages = [
         <p class="mt-5 max-w-xl text-base text-white/75 md:text-lg">
           Подберём, привезём, смонтируем и будем обслуживать. Более {Math.floor(products.length / 100) * 100} позиций в каталоге — лари, шкафы, витрины, горки, оборудование для общепита.
         </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="#catalog" class="btn bg-brand px-6 text-brand-night hover:bg-white">Смотреть каталог <Icon name="arrow" class="h-4 w-4" /></a>
-          <a href={company.phones[0].href} data-goal="click_phone" class="btn border border-white/25 px-6 text-white hover:bg-white/10"><Icon name="phone" class="h-4 w-4" />{company.phones[0].label}</a>
+        <div class="mt-8 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+          <a href="#catalog" class="btn whitespace-nowrap bg-brand px-3 text-[13px] text-brand-night hover:bg-white sm:px-6 sm:text-sm">Смотреть каталог <Icon name="arrow" class="hidden h-4 w-4 sm:block" /></a>
+          <a href={company.phones[0].href} data-goal="click_phone" class="btn gap-1.5 whitespace-nowrap border border-white/25 px-3 text-[13px] text-white hover:bg-white/10 sm:gap-2 sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />{company.phones[0].label}</a>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
