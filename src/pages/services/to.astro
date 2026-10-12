@@ -1,4 +1,123 @@
 ---
-import InfoLayout from '../../components/InfoLayout.astro';
+import ServiceLayout from '../../components/ServiceLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { u } from '../../lib/url';
+
+const facts = [
+  { value: 'от 250 ₽', label: 'в месяц за единицу оборудования' },
+  { value: '2 000 ₽', label: 'минимальная сумма договора' },
+  { value: '15 ₽/км', label: 'выезд за пределы Твери' },
+  { value: 'Тверь', label: 'область и соседние регионы' },
+];
+
+const works = [
+  { icon: 'users', text: 'Инструктаж персонала, который работает с оборудованием' },
+  { icon: 'eye', text: 'Диагностика рабочих процессов и внешнего состояния оборудования' },
+  { icon: 'gear', text: 'Проверка органов управления, настройка электронных параметров' },
+  { icon: 'drop', text: 'Контроль уровня и состояния масла, при необходимости дозаправка' },
+  { icon: 'thermo', text: 'Контроль температуры и утечек хладагента, при необходимости дозаправка' },
+  { icon: 'wrench', text: 'Проверка резьбовых соединений и сальниковых уплотнений' },
+  { icon: 'fan', text: 'Контроль работы вентиляторов и вспомогательного оборудования' },
+];
+
+const equipment = ['Холодильные шкафы и столы', 'Морозильные лари', 'Морозильные бонеты', 'Низко- и среднетемпературные витрины', 'Оборудование со встроенным агрегатом и под выносной холод', 'Холодильные камеры', 'Технологическое оборудование'];
+const places = ['Продуктовые магазины', 'Супермаркеты', 'Торговые центры', 'Рестораны и кафе', 'Предприятия общепита'];
+
+const prices = [
+  { name: 'Холодильная или морозильная витрина', price: '250–350 ₽' },
+  { name: 'Холодильный или морозильный шкаф', price: '250–350 ₽' },
+  { name: 'Холодильная горка', price: '350–500 ₽' },
+  { name: 'Морозильная бонета', price: '350–500 ₽' },
+  { name: 'Моноблок', price: '500–1 000 ₽' },
+  { name: 'Сплит-система', price: '500–1 000 ₽' },
+  { name: 'Электромеханическое оборудование', note: 'мясорубки, овощерезки, тестомесы и т. д.', price: '300–700 ₽' },
+  { name: 'Тепловое оборудование', note: 'плиты, печи, мармиты и т. д.', price: '700–1 500 ₽' },
+];
 ---
-<InfoLayout url="/services/to.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]} />
+<ServiceLayout
+  url="/services/to.html"
+  title="Техническое обслуживание холодильного оборудования в Твери — цены | ХолодМаркет"
+  description="Ежемесячное техническое обслуживание холодильного и технологического оборудования в Твери и области: витрины, шкафы, горки, бонеты, моноблоки, сплит-системы. От 250 ₽ за единицу."
+  h1="Техническое обслуживание"
+  lead="Регулярно обслуживаем холодильное, технологическое оборудование и холодильные камеры — чтобы не допускать серьёзных поломок и продлить срок службы."
+  cta="Заключить договор на ТО"
+  ctaText="Пришлите список оборудования — рассчитаем стоимость ежемесячного обслуживания."
+  serviceType="Техническое обслуживание холодильного оборудования"
+  image="/img/gen/service-maintenance.webp"
+>
+  <section aria-label="Основные условия" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    {facts.map((f) => (
+      <div class="card p-4 md:p-5">
+        <p class="text-xl font-extrabold tracking-tight text-brand-deep md:text-2xl">{f.value}</p>
+        <p class="mt-1 text-sm text-ink-soft">{f.label}</p>
+      </div>
+    ))}
+  </section>
+
+  <section class="mt-14 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
+    <div class="card overflow-hidden">
+      <img src={u('/img/gen/service-maintenance.webp')} alt="Холодильный агрегат: компрессор, ресивер и конденсатор" class="aspect-[16/10] w-full object-cover" />
+    </div>
+    <div>
+      <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Что входит в обслуживание</h2>
+      <p class="mt-2 text-ink-soft">Визит в согласованное с вами время: детальная диагностика и устранение найденных неполадок.</p>
+      <ul class="mt-6 space-y-3">
+        {works.map((w) => (
+          <li class="flex items-center gap-3">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ice text-brand-deep"><Icon name={w.icon} class="h-4.5 w-4.5" /></span>
+            <span class="text-[15px]">{w.text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="mt-14 grid gap-4 md:grid-cols-2">
+    <div class="card p-5 md:p-6">
+      <div class="flex items-center gap-3">
+        <span class="grid h-10 w-10 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name="snow" class="h-5 w-5" /></span>
+        <h2 class="text-lg font-extrabold">Какое оборудование обслуживаем</h2>
+      </div>
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {equipment.map((t) => <li class="rounded-lg bg-frost px-3 py-1.5 text-sm text-ink-soft ring-1 ring-line">{t}</li>)}
+      </ul>
+    </div>
+    <div class="card p-5 md:p-6">
+      <div class="flex items-center gap-3">
+        <span class="grid h-10 w-10 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name="pin" class="h-5 w-5" /></span>
+        <h2 class="text-lg font-extrabold">Где работаем</h2>
+      </div>
+      <ul class="mt-4 flex flex-wrap gap-2">
+        {places.map((t) => <li class="rounded-lg bg-frost px-3 py-1.5 text-sm text-ink-soft ring-1 ring-line">{t}</li>)}
+      </ul>
+      <p class="mt-4 text-sm text-ink-soft">Тверь, Тверская область и соседние области.</p>
+    </div>
+  </section>
+
+  <section id="prices" class="mt-14 scroll-mt-28">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="eyebrow">Цены</p>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Ежемесячное обслуживание</h2>
+      </div>
+      <p class="text-sm text-ink-soft">Стоимость за единицу оборудования в месяц</p>
+    </div>
+    <div class="mt-6 overflow-hidden rounded-2xl border border-line">
+      <ul class="divide-y divide-line">
+        {prices.map((p) => (
+          <li class="flex items-center justify-between gap-4 bg-white px-4 py-3.5 odd:bg-frost md:px-6">
+            <span>
+              <span class="block font-semibold">{p.name}</span>
+              {p.note && <span class="block text-sm text-muted">{p.note}</span>}
+            </span>
+            <span class="shrink-0 font-extrabold whitespace-nowrap text-brand-deep">{p.price}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <p class="flex items-center gap-3 rounded-xl bg-ice p-4 text-sm"><Icon name="calendar" class="h-5 w-5 shrink-0 text-brand-deep" /><span>Минимальная стоимость договора на ТО — <b>2 000 ₽</b></span></p>
+      <p class="flex items-center gap-3 rounded-xl bg-ice p-4 text-sm"><Icon name="truck" class="h-5 w-5 shrink-0 text-brand-deep" /><span>Выезд за пределы Твери — <b>15 ₽/км</b></span></p>
+    </div>
+  </section>
+</ServiceLayout>

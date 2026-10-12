@@ -4,7 +4,7 @@ import { abs } from '../lib/url';
 
 export const GET: APIRoute = ({ site }) => {
   const urls = [
-    '/', '/about.html', '/services.html', '/services/project.html', '/services/montaz.html', '/services/to.html', '/services/ro.html', '/kontakty.html',
+    '/', '/about.html', '/services/project.html', '/services/montaz.html', '/services/to.html', '/services/ro.html', '/kontakty.html',
     ...categories.filter((c) => c.url !== '/').map((c) => c.url),
     ...products.map((p) => p.url),
   ];

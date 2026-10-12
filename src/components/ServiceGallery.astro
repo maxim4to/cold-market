@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+import Lightbox from './Lightbox.astro';
+import { u } from '../lib/url';
+
+interface Props { images: { src: string; alt: string }[]; class?: string }
+const { images, class: cls = '' } = Astro.props;
+---
+<div data-gallery class={cls}>
+  <div class="relative">
+    <div data-track class="card flex snap-x snap-mandatory overflow-x-auto scroll-smooth bg-white [scrollbar-width:none] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden">
+      {images.map((im, i) => (
+        <a href={u(im.src)} data-lightbox data-slide={i} class="relative block aspect-[4/3] w-full shrink-0 snap-center cursor-zoom-in bg-frost">
+          <img src={u(im.src)} alt={im.alt} loading={i ? 'lazy' : 'eager'} decoding="async" class="absolute inset-0 h-full w-full object-cover" />
+        </a>
+      ))}
+    </div>
+    {images.length > 1 && (
+      <>
+        <button type="button" data-prev class="absolute top-1/2 left-3 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-md hover:bg-white" aria-label="Предыдущее фото"><Icon name="arrow" class="h-5 w-5 rotate-180" /></button>
+        <button type="button" data-next class="absolute top-1/2 right-3 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-ink shadow-md hover:bg-white" aria-label="Следующее фото"><Icon name="arrow" class="h-5 w-5" /></button>
+        <span data-counter class="absolute right-3 bottom-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white">1 / {images.length}</span>
+      </>
+    )}
+  </div>
+  {images.length > 1 && (
+    <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+      {images.map((im, i) => (
+        <button type="button" data-thumb={i} aria-label={`Фото ${i + 1}`} class={`relative h-16 w-20 shrink-0 overflow-hidden rounded-lg ring-2 transition sm:h-20 sm:w-28 ${i ? 'ring-transparent opacity-70 hover:opacity-100' : 'ring-brand-deep'}`}>
+          <img src={u(im.src)} alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+        </button>
+      ))}
+    </div>
+  )}
+</div>
+<Lightbox />
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-gallery]:not([data-ready])').forEach(function (g) {
+      g.setAttribute('data-ready', '');
+      var track = g.querySelector('[data-track]');
+      var slides = track.querySelectorAll('[data-slide]');
+      var thumbs = g.querySelectorAll('[data-thumb]');
+      var counter = g.querySelector('[data-counter]');
+      var n = slides.length, cur = 0;
+      function go(i) { cur = (i + n) % n; track.scrollTo({ left: cur * track.clientWidth }); }
+      function mark(i) {
+        cur = i;
+        thumbs.forEach(function (t, k) {
+          t.classList.toggle('ring-brand-deep', k === i);
+          t.classList.toggle('ring-transparent', k !== i);
+          t.classList.toggle('opacity-70', k !== i);
+        });
+        if (counter) counter.textContent = (i + 1) + ' / ' + n;
+      }
+      thumbs.forEach(function (t) { t.addEventListener('click', function () { go(+t.getAttribute('data-thumb')); }); });
+      var prev = g.querySelector('[data-prev]'), next = g.querySelector('[data-next]');
+      if (prev) prev.addEventListener('click', function () { go(cur - 1); });
+      if (next) next.addEventListener('click', function () { go(cur + 1); });
+      var t;
+      track.addEventListener('scroll', function () {
+        clearTimeout(t);
+        t = setTimeout(function () { mark(Math.round(track.scrollLeft / track.clientWidth)); }, 60);
+      }, { passive: true });
+    });
+  })();
+</script>

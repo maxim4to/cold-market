@@ -36,7 +36,7 @@ export const env = {
 
 export const nav = [
   { href: '/', label: 'Каталог' },
-  { href: '/services.html', label: 'Услуги' },
+  { href: '/#services', label: 'Услуги' },
   { href: '/about.html', label: 'О компании' },
   { href: '/kontakty.html', label: 'Контакты' },
 ];

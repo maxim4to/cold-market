@@ -84,13 +84,12 @@ const advantages = [
     </div>
   </section>
 
-  <section class="container-x py-14">
+  <section id="services" class="container-x scroll-mt-24 py-14">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <p class="eyebrow">Сервисная служба</p>
         <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Услуги</h2>
       </div>
-      <a href={u('/services.html')} class="flex items-center gap-1 text-sm font-semibold text-brand-deep">Все услуги <Icon name="arrow" class="h-4 w-4" /></a>
     </div>
     <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {services.map((s) => (

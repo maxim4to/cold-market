@@ -1,4 +1,75 @@
 ---
-import InfoLayout from '../../components/InfoLayout.astro';
+import ServiceLayout from '../../components/ServiceLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { u } from '../../lib/url';
+
+const steps = [
+  { icon: 'box', title: 'Хранение', text: 'Оборудование хранится на нашем складе до дня монтажа.' },
+  { icon: 'truck', title: 'Доставка', text: 'Собственный оборудованный автопарк — довезём даже в отдалённые районы области.' },
+  { icon: 'wrench', title: 'Монтаж на объекте', text: 'Устанавливаем оборудование прямо в магазине с учётом особенностей помещения.' },
+  { icon: 'thermo', title: 'Пусконаладка', text: 'Продолжительная тестовая работа всей системы в реальных условиях эксплуатации.' },
+  { icon: 'users', title: 'Обучение персонала', text: 'Показываем сотрудникам, как правильно пользоваться оборудованием.' },
+  { icon: 'shield', title: 'Сервис', text: 'Техническая поддержка, обслуживание и ремонт на протяжении всего срока службы.' },
+];
+
+const quality = [
+  { title: 'Своя команда установщиков', text: 'Монтаж выполняют наши специалисты, которые регулярно устанавливают и сложное торговое оборудование.' },
+  { title: 'Профессиональный инструмент', text: 'Используем профессиональное оборудование и качественные расходные материалы.' },
+  { title: 'Аккуратность', text: 'Оборудование после монтажа выглядит презентабельно — без царапин и вмятин. От внешнего вида зависят продажи.' },
+  { title: 'Удобство и нормы', text: 'Расставляем оборудование так, чтобы к нему был свободный доступ покупателей и соблюдались все нормы.' },
+];
 ---
-<InfoLayout url="/services/montaz.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]} />
+<ServiceLayout
+  url="/services/montaz.html"
+  title="Монтаж торгового и холодильного оборудования в Твери — ХолодМаркет"
+  description="Монтаж торгового и холодильного оборудования под ключ: хранение, доставка собственным транспортом, установка, пусконаладка и обучение персонала. Тверь и Тверская область."
+  h1="Монтаж"
+  lead="Монтаж торгового и холодильного оборудования под ключ — от хранения и доставки до пусконаладки и обучения персонала."
+  cta="Заказать монтаж"
+  ctaText="Расскажите, какое оборудование и куда нужно установить, — согласуем сроки и стоимость."
+  serviceType="Монтаж торгового оборудования"
+  image="/img/gen/service-montage.webp"
+>
+  <section class="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
+    <div class="card overflow-hidden">
+      <img src={u('/img/gen/service-montage.webp')} alt="Монтажники устанавливают холодильную горку в торговом зале" class="aspect-[3/2] w-full object-cover" />
+    </div>
+    <div>
+      <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Работаем на постоянной основе</h2>
+      <p class="mt-4 text-ink-soft">Монтаж выполняет постоянная команда профессиональных установщиков ООО «ХолодМаркет». В услугу входит весь путь оборудования — со склада до работающего торгового зала, а после монтажа мы продолжаем обслуживать оборудование.</p>
+      <p class="mt-3 text-ink-soft">Правильный монтаж помогает магазину продавать больше, повышает узнаваемость бренда и лояльность покупателей.</p>
+    </div>
+  </section>
+
+  <section class="mt-14">
+    <p class="eyebrow">От склада до запуска</p>
+    <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Что входит в монтаж</h2>
+    <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {steps.map((s, i) => (
+        <li class="card relative p-5">
+          <div class="flex items-center gap-3">
+            <span class="grid h-11 w-11 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={s.icon} class="h-5 w-5" /></span>
+            <span class="text-sm font-bold text-muted">Этап {i + 1}</span>
+          </div>
+          <p class="mt-4 font-extrabold">{s.title}</p>
+          <p class="mt-1.5 text-sm text-ink-soft">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="mt-14 rounded-2xl border border-line bg-gradient-to-br from-frost to-ice p-6 md:p-8">
+    <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Как мы работаем</h2>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      {quality.map((q) => (
+        <div class="flex gap-3 rounded-xl bg-white p-4 ring-1 ring-line">
+          <span class="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-deep text-white"><Icon name="check" class="h-4 w-4" /></span>
+          <span>
+            <span class="block font-extrabold">{q.title}</span>
+            <span class="mt-1 block text-sm text-ink-soft">{q.text}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  </section>
+</ServiceLayout>

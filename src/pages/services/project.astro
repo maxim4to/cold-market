@@ -1,4 +1,77 @@
 ---
-import InfoLayout from '../../components/InfoLayout.astro';
+import ServiceLayout from '../../components/ServiceLayout.astro';
+import ServiceGallery from '../../components/ServiceGallery.astro';
+import Icon from '../../components/Icon.astro';
+
+const gallery = [
+  { src: '/img/gen/project-layout.webp', alt: 'Проект расстановки оборудования в торговом зале' },
+  { src: '/img/gen/project-3d.webp', alt: '3D-визуализация торгового зала с витриной' },
+  { src: '/img/gen/project-plan.webp', alt: 'План торгового зала со стеллажами и холодильным оборудованием' },
+  { src: '/img/gen/project-hall.webp', alt: 'Визуализация торгового зала со стеллажами' },
+];
+
+const scope = [
+  { icon: 'layout', title: 'Планировка зала', text: 'Выбираем планировочную схему под формат и площадь — торговую или складскую.' },
+  { icon: 'cart', title: 'Распределение товарных групп', text: 'Размещаем группы товаров с учётом спроса и того, как покупатели ищут и выбирают товар.' },
+  { icon: 'snow', title: 'Подбор оборудования', text: 'Подбираем торговое и холодильное оборудование для представления каждой группы.' },
+  { icon: 'eye', title: 'Визуализация', text: 'Показываем будущий зал наглядно, чтобы решения можно было обсудить до закупки и монтажа.' },
+];
+
+const principles = [
+  { icon: 'star', title: 'Индивидуальность', text: 'Проект под ваш магазин, а не типовая расстановка.' },
+  { icon: 'layout', title: 'Единый образ магазина', text: 'Зал, оборудование и навигация работают на один узнаваемый стиль.' },
+  { icon: 'chart', title: 'Эффективное пространство', text: 'Каждый метр зала используется для продаж.' },
+  { icon: 'users', title: 'Комфорт для покупателей', text: 'Удобные проходы и приятная атмосфера, в которой хочется задержаться.' },
+  { icon: 'gear', title: 'Удобство процессов', text: 'Продуманы торговые и технологические процессы: выкладка, пополнение, обслуживание.' },
+  { icon: 'shield', title: 'Безопасность и сохранность', text: 'Планировка помогает предотвращать потери и соответствует требованиям безопасности.' },
+];
 ---
-<InfoLayout url="/services/project.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]} />
+<ServiceLayout
+  url="/services/project.html"
+  title="Проектирование магазинов и торговых залов в Твери — ХолодМаркет"
+  description="Проектирование торговых и складских площадей любого формата: планировка зала, распределение товарных групп, подбор торгового и холодильного оборудования. Тверь и Тверская область."
+  h1="Проектирование"
+  lead="Проектируем торговые и складские площади любого формата и специализации — от планировки зала до подбора оборудования."
+  cta="Обсудить проект"
+  ctaText="Расскажите о помещении и формате магазина — подскажем, с чего начать, и подберём оборудование."
+  serviceType="Проектирование торговых помещений"
+  image="/img/gen/project-3d.webp"
+>
+  <section class="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-start">
+    <ServiceGallery images={gallery} />
+    <div>
+      <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Что входит в проект</h2>
+      <ul class="mt-6 space-y-4">
+        {scope.map((s) => (
+          <li class="flex gap-4">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={s.icon} class="h-5 w-5" /></span>
+            <span>
+              <span class="block font-extrabold">{s.title}</span>
+              <span class="mt-0.5 block text-sm text-ink-soft">{s.text}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="mt-14 overflow-hidden rounded-2xl bg-gradient-to-br from-brand-night to-[#0b3b5e] p-6 text-white md:p-10">
+    <p class="eyebrow text-brand">Почему это важно</p>
+    <p class="mt-3 max-w-3xl text-xl font-extrabold leading-snug md:text-2xl">Торговый зал легко украсить и обновить, но гораздо труднее изменить его логику — особенно когда магазин уже работает.</p>
+    <p class="mt-4 max-w-3xl text-white/75">В неудачно спланированном зале ассортимент, мерчандайзинг, акции и программы лояльности раскрывают потенциал продаж лишь частично. Поэтому планировку стоит продумать до открытия — с пониманием процесса торговли, характера спроса и того, как покупатели ищут и выбирают товар.</p>
+  </section>
+
+  <section class="mt-14">
+    <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Каким получится магазин</h2>
+    <p class="mt-2 max-w-2xl text-ink-soft">Помогаем создать успешный торговый объект, который отвечает современным требованиям.</p>
+    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {principles.map((p) => (
+        <div class="card p-5">
+          <span class="grid h-11 w-11 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={p.icon} class="h-5 w-5" /></span>
+          <p class="mt-4 font-extrabold">{p.title}</p>
+          <p class="mt-1.5 text-sm text-ink-soft">{p.text}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+</ServiceLayout>

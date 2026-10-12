@@ -117,6 +117,10 @@ const ld = [orgLd, ...jsonld];
               </div>
             </div>
           </details>
+          <script is:inline>
+            // in-page links (e.g. "Услуги" -> /#services on the home page) don't reload the page, so close the menu explicitly
+            document.getElementById('site-menu').addEventListener('click', function (e) { if (e.target.closest('a')) this.open = false; });
+          </script>
         </div>
       </div>
     </header>
