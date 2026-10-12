@@ -1,5 +1,5 @@
 ---
-import { localImage, allLabels, type Product } from '../lib/catalog';
+import { localImage, allLabels, displayPrice, type Product } from '../lib/catalog';
 import { u } from '../lib/url';
 import Icon from './Icon.astro';
 interface Props { product: Product }
@@ -28,7 +28,7 @@ const keySpecs = p.specs.flatMap((g) => g.fields).filter((f) => !/^(Модель
     <div class="mt-auto flex items-end justify-between gap-2 pt-2">
       <span>
         {p.old_price && <span class="block text-xs text-muted line-through">{p.old_price}</span>}
-        <span class="text-lg font-extrabold tracking-tight">{p.price}</span>
+        <span class={`font-extrabold tracking-tight ${displayPrice(p.price) === p.price ? "text-lg" : "text-sm text-brand-deep"}`}>{displayPrice(p.price)}</span>
       </span>
       <span class="grid h-9 w-9 place-items-center rounded-lg bg-ice text-brand-deep transition group-hover:bg-brand-deep group-hover:text-white"><Icon name="arrow" class="h-4 w-4" /></span>
     </div>

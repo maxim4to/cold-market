@@ -7,7 +7,7 @@ import ContactCta from '../components/ContactCta.astro';
 import Icon from '../components/Icon.astro';
 import {
   categories, products, productByUrl, categoryByUrl, categoryTrail, primaryCategory,
-  allLabels, priceNumber, localImage, cleanHtml, plain, type Product, type Category,
+  allLabels, priceNumber, displayPrice, localImage, cleanHtml, plain, type Product, type Category,
 } from '../lib/catalog';
 import { company } from '../lib/site';
 import { u, abs } from '../lib/url';
@@ -139,7 +139,7 @@ const descHtml = product ? cleanHtml(product.description_html) : '';
           {product.product_code && <p class="mt-1 text-sm text-muted">Артикул: <span class="font-semibold text-ink-soft">{product.product_code}</span></p>}
 
           <div class="mt-6 flex items-end gap-3">
-            <span class="text-3xl font-extrabold tracking-tight md:text-4xl">{product.price}</span>
+            <span class={`font-extrabold tracking-tight ${displayPrice(product.price) === product.price ? "text-3xl md:text-4xl" : "text-2xl text-brand-deep md:text-3xl"}`}>{displayPrice(product.price)}</span>
             {product.old_price && <span class="pb-1 text-lg text-muted line-through">{product.old_price}</span>}
           </div>
           <p class="mt-2 text-xs leading-relaxed text-muted">Цена ознакомительная. Актуальную стоимость и наличие уточняйте у менеджера.</p>

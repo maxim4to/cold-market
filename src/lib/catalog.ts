@@ -153,3 +153,9 @@ export function infoImages(url: string): string[] {
   const p = infoPages[url];
   return p ? [...p.content_html.matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]) : [];
 }
+
+// The old site uses "1 руб." as a placeholder for products without a public price
+export function displayPrice(price: string | null): string {
+  const n = priceNumber(price);
+  return !n || n <= 1 ? 'Цена по запросу' : price!;
+}
