@@ -58,12 +58,12 @@ export const services = [
     href: '/services/to.html',
     title: 'Техническое обслуживание',
     short: 'Регулярное ТО холодильного и технологического оборудования.',
-    image: '/images/Celseon.jpg',
+    image: '/img/gen/service-maintenance.webp',
   },
   {
     href: '/services/ro.html',
     title: 'Ремонт оборудования',
     short: 'Ремонт холодильного и технологического оборудования с выездом.',
-    image: '/images/item_19.png',
+    image: '/img/gen/service-repair.webp',
   },
 ];

@@ -91,6 +91,7 @@ const publicDir = path.resolve(process.cwd(), 'public');
 // Until the copy exists the original URL is used, so the site can go live before all photos are converted.
 export function localImage(src: string | null | undefined, size: 'full' | 'thumb' = 'full'): string | null {
   if (!src) return null;
+  if (src.startsWith('/img/')) return src;
   let p = src.startsWith('http') ? new URL(src).pathname : src;
   p = decodeURIComponent(p);
   let local: string;
