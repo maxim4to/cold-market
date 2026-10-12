@@ -27,7 +27,7 @@ for (const file of jobs) {
   const base = path.basename(file).replace(/\.\w+$/, '');
   if (rel.includes('img_products/')) {
     if (base.startsWith('thumb_')) continue;
-    const name = base.replace(/^full_/, '');
+    const name = base.replace(/^(?:full_|thumb_)+/, '');
     plan.push({ file, dst: `p/${name}.webp`, width: 1200 });
     plan.push({ file, dst: `p/t/${name}.webp`, width: 480 });
   } else if (rel.includes('img_categories/')) {

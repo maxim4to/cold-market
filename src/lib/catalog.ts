@@ -94,7 +94,7 @@ export function localImage(src: string | null | undefined, size: 'full' | 'thumb
   let p = src.startsWith('http') ? new URL(src).pathname : src;
   p = decodeURIComponent(p);
   let local: string;
-  const m = p.match(/img_products\/(?:full_|thumb_)?([^/]+)\.\w+$/);
+  const m = p.match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/);
   const c = p.match(/img_categories\/([^/]+)\.\w+$/);
   if (m) local = `/img/p/${size === 'thumb' ? 't/' : ''}${m[1]}.webp`;
   else if (c) local = `/img/c/${c[1]}.webp`;

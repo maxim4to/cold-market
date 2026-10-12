@@ -18,12 +18,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Staging on mi-crafts.com/cold-market: hidden from search engines, no analytics/chat
+      # Staging on mi-crafts.com/cold-market: hidden from search engines, no analytics; Jivo uses the live account
       SITE_URL: ${{ vars.SITE_URL || 'https://mi-crafts.com' }}
       BASE_PATH: ${{ vars.BASE_PATH || '/cold-market' }}
       PUBLIC_NOINDEX: ${{ vars.PUBLIC_NOINDEX || 'true' }}
       PUBLIC_METRIKA_ID: ${{ vars.PUBLIC_METRIKA_ID }}
-      PUBLIC_JIVO_ID: ${{ vars.PUBLIC_JIVO_ID }}
+      PUBLIC_JIVO_ID: ${{ vars.PUBLIC_JIVO_ID || 'sJNQnSEwuL' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
