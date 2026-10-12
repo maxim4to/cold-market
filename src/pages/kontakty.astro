@@ -22,7 +22,7 @@ import { company } from '../lib/site';
       <div class="card p-6">
         <p class="eyebrow">Мессенджеры и почта</p>
         <div class="mt-3 grid gap-2">
-          <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa justify-start"><Icon name="whatsapp" class="h-4 w-4" />WhatsApp {company.whatsapp.label}</a>
+          <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa justify-start"><Icon name="whatsapp" class="h-4 w-4" /><span>WhatsApp <span class="whitespace-nowrap">{company.whatsapp.label}</span></span></a>
           <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="btn-tg justify-start"><Icon name="telegram" class="h-4 w-4" />Telegram {company.telegram.label}</a>
           <a href={`mailto:${company.email}`} data-goal="click_email" class="btn-ghost justify-start"><Icon name="mail" class="h-4 w-4" />{company.email}</a>
         </div>

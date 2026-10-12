@@ -77,8 +77,8 @@ const phone = company.phones[0];
         Ремонтируем холодильное и технологическое оборудование магазинов, кафе и производств в Твери и Тверской области — с выездом на объект.
       </p>
       <div class="mt-6 grid grid-cols-2 gap-2 sm:flex sm:gap-3">
-        <a href={phone.href} data-goal="click_phone" class="btn-primary whitespace-nowrap px-3 text-[13px] sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />Вызвать мастера</a>
-        <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa whitespace-nowrap px-3 text-[13px] sm:px-6 sm:text-sm"><Icon name="whatsapp" class="h-4 w-4 shrink-0" />Написать в WhatsApp</a>
+        <a href={phone.href} data-goal="click_phone" class="btn-primary px-3 text-[13px] max-sm:leading-tight sm:whitespace-nowrap sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />Вызвать мастера</a>
+        <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa px-3 text-[13px] max-sm:leading-tight sm:whitespace-nowrap sm:px-6 sm:text-sm"><Icon name="whatsapp" class="h-4 w-4 shrink-0" />Написать в WhatsApp</a>
       </div>
     </div>
   </div>
@@ -99,8 +99,8 @@ const phone = company.phones[0];
         {[['snow', 'Холодильное оборудование', fridgeTypes, '#fridge'], ['wrench', 'Технологическое оборудование', techTypes, '#tech']].map(([icon, title, list, anchor]) => (
           <div class="card p-5 md:p-6">
             <div class="flex items-center gap-3">
-              <span class="grid h-10 w-10 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={icon as string} class="h-5 w-5" /></span>
-              <h3 class="text-lg font-extrabold">{title}</h3>
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={icon as string} class="h-5 w-5" /></span>
+              <h3 class="min-w-0 hyphens-auto text-lg font-extrabold [overflow-wrap:anywhere]">{title}</h3>
             </div>
             <ul class="mt-4 flex flex-wrap gap-2">
               {(list as string[]).map((t) => <li class="rounded-lg bg-frost px-3 py-1.5 text-sm text-ink-soft ring-1 ring-line">{t}</li>)}
@@ -175,7 +175,7 @@ const phone = company.phones[0];
               {modes.map((m) => (
                 <li class="flex items-center gap-4 rounded-xl bg-white p-4 ring-1 ring-line">
                   <span class="w-28 shrink-0 text-lg font-extrabold tracking-tight text-brand-deep">{m.range}</span>
-                  <span class="text-sm text-ink-soft">{m.goods}</span>
+                  <span class="min-w-0 hyphens-auto text-sm text-ink-soft [overflow-wrap:anywhere]">{m.goods}</span>
                 </li>
               ))}
             </ul>

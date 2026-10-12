@@ -18,11 +18,11 @@ const frame = framedStyle(image, 4 / 3);
     {img && !frame && <img src={u(img)} alt={name} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-contain p-4 mix-blend-multiply transition group-hover:scale-[1.03]" />}
     {!img && <Icon name="snow" class="h-12 w-12 text-brand/40" />}
   </div>
-  <div class="flex flex-1 items-end justify-between gap-2 border-t border-line px-4 py-3">
-    <span>
-      <span class="block text-[15px] font-bold leading-snug">{name}</span>
-      {count ? <span class="mt-0.5 block text-xs text-muted">{productsLabel(count)}</span> : null}
+  <div class="flex flex-1 flex-col justify-end border-t border-line px-3 py-3 sm:px-4">
+    <span class="block hyphens-auto text-[15px] font-bold leading-snug break-words">{name}</span>
+    <span class="mt-0.5 flex items-center justify-between gap-2">
+      <span class="text-xs text-muted">{count ? productsLabel(count) : null}</span>
+      <Icon name="arrow" class="h-4 w-4 shrink-0 text-brand-deep transition group-hover:translate-x-0.5" />
     </span>
-    <Icon name="arrow" class="mb-0.5 h-4 w-4 shrink-0 text-brand-deep transition group-hover:translate-x-0.5" />
   </div>
 </a>

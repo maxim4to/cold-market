@@ -10,8 +10,8 @@ const phone = company.phones[0];
   <p class="mt-1.5 text-sm text-white/70">{text}</p>
   <a href={phone.href} data-goal="click_phone" class="mt-4 flex items-center gap-2 text-2xl font-extrabold tracking-tight hover:text-brand"><Icon name="phone" class="h-6 w-6 text-brand" />{phone.label}</a>
   <div class="mt-4 grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
-    <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa gap-1 whitespace-nowrap px-1.5 text-[12.5px] sm:gap-2 sm:px-5 sm:text-sm"><Icon name="whatsapp" class="h-4 w-4 shrink-0" />WhatsApp</a>
-    <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="btn-tg gap-1 whitespace-nowrap px-1.5 text-[12.5px] sm:gap-2 sm:px-5 sm:text-sm"><Icon name="telegram" class="h-4 w-4 shrink-0" />Telegram</a>
-    <a href={`mailto:${company.email}`} data-goal="click_email" class="btn gap-1 whitespace-nowrap border border-white/20 px-1.5 text-[12.5px] text-white hover:bg-white/10 sm:gap-2 sm:px-5 sm:text-sm"><Icon name="mail" class="h-4 w-4 shrink-0" />E-mail</a>
+    <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa flex-wrap content-center gap-x-1 gap-y-0.5 whitespace-nowrap px-1.5 text-[12.5px] sm:flex-nowrap sm:gap-2 sm:px-5 sm:text-sm"><Icon name="whatsapp" class="h-4 w-4 shrink-0" />WhatsApp</a>
+    <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="btn-tg flex-wrap content-center gap-x-1 gap-y-0.5 whitespace-nowrap px-1.5 text-[12.5px] sm:flex-nowrap sm:gap-2 sm:px-5 sm:text-sm"><Icon name="telegram" class="h-4 w-4 shrink-0" />Telegram</a>
+    <a href={`mailto:${company.email}`} data-goal="click_email" class="btn flex-wrap content-center gap-x-1 gap-y-0.5 whitespace-nowrap border border-white/20 px-1.5 text-[12.5px] text-white hover:bg-white/10 sm:flex-nowrap sm:gap-2 sm:px-5 sm:text-sm"><Icon name="mail" class="h-4 w-4 shrink-0" />E-mail</a>
   </div>
 </div>

@@ -6,7 +6,7 @@ import { u } from '../lib/url';
 interface Props { images: { src: string; alt: string }[]; class?: string }
 const { images, class: cls = '' } = Astro.props;
 ---
-<div data-gallery class={cls}>
+<div data-gallery class={`min-w-0 ${cls}`}>
   <div class="relative">
     <div data-track class="card flex snap-x snap-mandatory overflow-x-auto scroll-smooth bg-white [scrollbar-width:none] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden">
       {images.map((im, i) => (

@@ -106,7 +106,7 @@ const prices = [
       <ul class="divide-y divide-line">
         {prices.map((p) => (
           <li class="flex items-center justify-between gap-4 bg-white px-4 py-3.5 odd:bg-frost md:px-6">
-            <span>
+            <span class="min-w-0 hyphens-auto [overflow-wrap:anywhere]">
               <span class="block font-semibold">{p.name}</span>
               {p.note && <span class="block text-sm text-muted">{p.note}</span>}
             </span>

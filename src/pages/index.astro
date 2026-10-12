@@ -40,12 +40,12 @@ const advantages = [
           Подберём, привезём, смонтируем и будем обслуживать. Более {Math.floor(products.length / 100) * 100} позиций в каталоге — лари, шкафы, витрины, горки, оборудование для общепита.
         </p>
         <div class="mt-8 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-          <a href="#catalog" class="btn whitespace-nowrap bg-brand px-3 text-[13px] text-brand-night hover:bg-white sm:px-6 sm:text-sm">Смотреть каталог <Icon name="arrow" class="hidden h-4 w-4 sm:block" /></a>
-          <a href={company.phones[0].href} data-goal="click_phone" class="btn gap-1.5 whitespace-nowrap border border-white/25 px-3 text-[13px] text-white hover:bg-white/10 sm:gap-2 sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />{company.phones[0].label}</a>
+          <a href="#catalog" class="btn bg-brand px-3 text-center text-[13px] text-brand-night hover:bg-white max-sm:leading-tight sm:whitespace-nowrap sm:px-6 sm:text-sm">Смотреть каталог <Icon name="arrow" class="hidden h-4 w-4 sm:block" /></a>
+          <a href={company.phones[0].href} data-goal="click_phone" class="btn flex-wrap content-center gap-1.5 gap-y-0.5 whitespace-nowrap border border-white/25 px-2 text-[13px] text-white hover:bg-white/10 sm:flex-nowrap sm:gap-2 sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />{company.phones[0].label}</a>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        {[['20+', 'лет на рынке'], [String(products.length), 'позиций в каталоге'], ['Тверь', 'и Тверская область'], ['от 350 ₽', 'стоимость ремонтных работ']].map(([a, b]) => (
+        {[['20+', 'лет на рынке'], [String(products.length), 'позиций в каталоге'], ['Тверь', 'и Тверская область'], ['от 350\u00a0₽', 'стоимость ремонтных работ']].map(([a, b]) => (
           <div class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
             <p class="text-2xl font-extrabold text-white md:text-3xl">{a}</p>
             <p class="mt-1 text-sm text-white/60">{b}</p>
