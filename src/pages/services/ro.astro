@@ -1,15 +1,191 @@
 ---
-import InfoLayout from '../../components/InfoLayout.astro';
-import { categoryByUrl, cleanHtml } from '../../lib/catalog';
+import Base from '../../layouts/Base.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ContactCta from '../../components/ContactCta.astro';
+import Icon from '../../components/Icon.astro';
+import { company } from '../../lib/site';
+import { abs } from '../../lib/url';
 
-// The old catalog had this service only as a "Лари универсальные (переделка)" category
-const conversion = cleanHtml(categoryByUrl.get('/lari-universalnye2.html')?.description_html ?? '', { dropTitle: false });
+const facts = [
+  { value: '500 ₽', label: 'выезд мастера по Твери' },
+  { value: '10–15 ₽/км', label: 'выезд за пределы Твери' },
+  { value: '300 ₽', label: 'акт дефектации' },
+  { value: '2 дня', label: 'переделка ларя под другой режим' },
+];
+
+const fridgeTypes = ['Морозильные лари', 'Холодильные и морозильные шкафы', 'Витрины', 'Горки', 'Бонеты', 'Льдогенераторы', 'Моноблоки', 'Сплит-системы', 'Агрегаты'];
+const techTypes = ['Мясорубки', 'Овощерезки', 'Картофелечистки', 'Тестомесы', 'Электрические плиты', 'Жарочные поверхности', 'Грили', 'Печи', 'Мармиты', 'Рисоварки'];
+
+const fridgeTiers = [
+  {
+    tier: 'I', price: 'от 350 ₽', time: 'до 30 минут',
+    works: ['Замена кнопки «Вкл»', 'Настройка термостата', 'Замена теплового реле', 'Замена лампы освещения', 'Настройка параметров микропроцессора'],
+  },
+  {
+    tier: 'II', price: 'от 700 ₽', time: 'до 1 часа',
+    works: ['Замена термостата', 'Чистка конденсатора', 'Устранение засора дренажной системы', 'Замена пускозащитного реле', 'Замена микропроцессора', 'Замена вентилятора испарителя или конденсатора', 'Замена электрического конденсатора'],
+  },
+  {
+    tier: 'III', price: 'от 1 400 ₽', time: 'до 2 часов',
+    works: ['Замена фильтра-осушителя', 'Устранение утечки фреона', 'Изменение дозы заправки фреона', 'Замена холодильной арматуры (ТРВ, шаровой вентиль и т. д.)', 'Другой ремонт, связанный с нарушением герметичности'],
+  },
+  {
+    tier: 'IV', price: 'от 2 100 ₽', time: 'сложный ремонт',
+    works: ['Замена ТЭНов испарителя', 'Замена испарителя', 'Замена воздушного конденсатора', 'Замена компрессора', 'Удаление влаги из системы'],
+  },
+];
+
+const techTiers = [
+  { name: 'Простой ремонт', note: 'без разборки оборудования', price: '500–800 ₽', works: 'Ремонт проводки, чистка контактов, замена предохранителей, кнопок, уплотнителей, лампочек и другой фурнитуры — работы без запасных частей.' },
+  { name: 'Средний ремонт', note: 'с частичной разборкой', price: '800–1 500 ₽', works: 'Замена терморегуляторов, таймеров, переключателей режимов конфорок и другие работы с использованием запасных частей.' },
+  { name: 'Сложный ремонт', note: 'с разборкой оборудования', price: 'от 1 500 ₽', works: 'Ремонт и замена двигателей, блоков управления, сенсорных панелей, ТЭНов, вентиляторов и другие работы по замене узлов и агрегатов.' },
+];
+
+const modes = [
+  { range: '0…+7 °С', goods: 'молочная и колбасная продукция, напитки' },
+  { range: '−5…+5 °С', goods: 'икра, пресервы, охлаждённое мясо' },
+  { range: '−12…−25 °С', goods: 'замороженные рыба, мясо, полуфабрикаты, мороженое' },
+];
+
+const jsonld = [{
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Ремонт холодильного и технологического оборудования',
+  serviceType: 'Ремонт холодильного оборудования',
+  areaServed: { '@type': 'City', name: 'Тверь' },
+  provider: { '@id': abs('/', Astro.site) + '#org' },
+  offers: [
+    { '@type': 'Offer', name: 'Выезд специалиста по Твери', price: 500, priceCurrency: 'RUB' },
+    { '@type': 'Offer', name: 'Ремонт холодильного оборудования I категории', price: 350, priceCurrency: 'RUB' },
+    { '@type': 'Offer', name: 'Переделка морозильного ларя', price: 2000, priceCurrency: 'RUB' },
+  ],
+}];
+const phone = company.phones[0];
 ---
-<InfoLayout url="/services/ro.html" eyebrow="Услуги" crumbs={[{ url: '/services.html', name: 'Услуги' }]}>
-  {conversion && (
-    <section class="mt-10 max-w-3xl">
-      <h2 class="text-xl font-extrabold">Переделка морозильных ларей</h2>
-      <div class="prose-cm mt-3 text-base" set:html={conversion} />
+<Base
+  title="Ремонт холодильного и технологического оборудования в Твери — цены | ХолодМаркет"
+  description="Ремонт морозильных ларей, холодильных шкафов, витрин, горок, моноблоков, сплит-систем и оборудования для общепита в Твери. Выезд мастера — 500 ₽, ремонт от 350 ₽. Переделка ларей под другой температурный режим."
+  canonical="/services/ro.html"
+  jsonld={jsonld}
+>
+  <div class="border-b border-line bg-gradient-to-b from-ice to-white">
+    <div class="container-x py-5"><Breadcrumbs items={[{ url: '/services.html', name: 'Услуги' }, { url: '/services/ro.html', name: 'Ремонт оборудования' }]} /></div>
+    <div class="container-x pb-10 pt-4">
+      <p class="eyebrow">Сервисная служба</p>
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight md:text-5xl">Ремонт оборудования</h1>
+      <p class="mt-4 max-w-2xl text-base text-ink-soft md:text-lg">
+        Ремонтируем холодильное и технологическое оборудование магазинов, кафе и производств в Твери и Тверской области — с выездом на объект.
+      </p>
+      <div class="mt-6 grid grid-cols-2 gap-2 sm:flex sm:gap-3">
+        <a href={phone.href} data-goal="click_phone" class="btn-primary whitespace-nowrap px-3 text-[13px] sm:px-6 sm:text-sm"><Icon name="phone" class="h-4 w-4 shrink-0" />Вызвать мастера</a>
+        <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa whitespace-nowrap px-3 text-[13px] sm:px-6 sm:text-sm"><Icon name="whatsapp" class="h-4 w-4 shrink-0" />Написать в WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-x py-10">
+    <section aria-label="Основные цены" class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {facts.map((f) => (
+        <div class="card p-4 md:p-5">
+          <p class="text-xl font-extrabold tracking-tight text-brand-deep md:text-2xl">{f.value}</p>
+          <p class="mt-1 text-sm text-ink-soft">{f.label}</p>
+        </div>
+      ))}
     </section>
-  )}
-</InfoLayout>
+
+    <section class="mt-14">
+      <h2 class="text-2xl font-extrabold tracking-tight md:text-3xl">Что ремонтируем</h2>
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        {[['snow', 'Холодильное оборудование', fridgeTypes, '#fridge'], ['wrench', 'Технологическое оборудование', techTypes, '#tech']].map(([icon, title, list, anchor]) => (
+          <div class="card p-5 md:p-6">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={icon as string} class="h-5 w-5" /></span>
+              <h3 class="text-lg font-extrabold">{title}</h3>
+            </div>
+            <ul class="mt-4 flex flex-wrap gap-2">
+              {(list as string[]).map((t) => <li class="rounded-lg bg-frost px-3 py-1.5 text-sm text-ink-soft ring-1 ring-line">{t}</li>)}
+            </ul>
+            <a href={anchor as string} class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-deep">Цены на ремонт <Icon name="arrow" class="h-4 w-4" /></a>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section id="fridge" class="mt-14 scroll-mt-28">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="eyebrow">Цены</p>
+          <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Ремонт холодильного оборудования</h2>
+        </div>
+        <p class="text-sm text-ink-soft">Выезд по Твери — <b class="text-ink">500 ₽</b>, за пределы города — <b class="text-ink">15 ₽/км</b></p>
+      </div>
+      <p class="mt-3 max-w-3xl text-sm text-muted">Работы разделены на четыре категории по сложности и трудоёмкости. Указана минимальная стоимость категории; в неё входят и другие работы сопоставимой трудоёмкости.</p>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {fridgeTiers.map((t) => (
+          <div class="card flex flex-col p-5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="rounded-md bg-brand-night px-2 py-0.5 text-xs font-bold tracking-wider text-white">{t.tier} категория</span>
+              <span class="text-xs text-muted">{t.time}</span>
+            </div>
+            <p class="mt-3 text-2xl font-extrabold tracking-tight">{t.price}</p>
+            <ul class="mt-4 space-y-2 border-t border-line pt-4 text-sm text-ink-soft">
+              {t.works.map((w) => <li class="flex gap-2"><span class="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />{w}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section id="tech" class="mt-14 scroll-mt-28">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="eyebrow">Цены</p>
+          <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Ремонт технологического оборудования</h2>
+        </div>
+        <p class="text-sm text-ink-soft">Вызов по Твери — <b class="text-ink">500 ₽</b>, за пределы города — <b class="text-ink">10 ₽/км</b>, акт дефектации — <b class="text-ink">300 ₽</b></p>
+      </div>
+      <div class="mt-6 grid gap-4 md:grid-cols-3">
+        {techTiers.map((t) => (
+          <div class="card flex flex-col p-5">
+            <p class="text-lg font-extrabold">{t.name}</p>
+            <p class="text-sm text-muted">{t.note}</p>
+            <p class="mt-3 text-2xl font-extrabold tracking-tight text-brand-deep">{t.price}</p>
+            <p class="mt-3 border-t border-line pt-3 text-sm text-ink-soft">{t.works}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section id="lari" class="mt-14 scroll-mt-28">
+      <div class="overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-frost to-ice">
+        <div class="grid gap-8 p-6 md:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+          <div>
+            <p class="eyebrow">Доработка оборудования</p>
+            <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Переделка морозильных ларей</h2>
+            <p class="mt-3 text-ink-soft">Перенастроим морозильный ларь под нужный температурный режим — в одном и том же оборудовании можно хранить разные продукты и легко менять режим. Переделываем ваше оборудование или предложим новые лари разных производителей.</p>
+            <dl class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div class="col-span-2 rounded-xl bg-white p-3 ring-1 ring-line sm:col-span-1"><dt class="text-xs text-muted">Стоимость с материалами</dt><dd class="mt-1 font-extrabold whitespace-nowrap">2 000–3 500 ₽</dd></div>
+              <div class="rounded-xl bg-white p-3 ring-1 ring-line"><dt class="text-xs text-muted">Срок</dt><dd class="mt-1 font-extrabold">2 рабочих дня</dd></div>
+              <div class="rounded-xl bg-white p-3 ring-1 ring-line"><dt class="text-xs text-muted">Гарантия</dt><dd class="mt-1 font-extrabold">Есть</dd></div>
+            </dl>
+          </div>
+          <div>
+            <p class="text-sm font-bold">Температурные режимы</p>
+            <ul class="mt-3 space-y-3">
+              {modes.map((m) => (
+                <li class="flex items-center gap-4 rounded-xl bg-white p-4 ring-1 ring-line">
+                  <span class="w-28 shrink-0 text-lg font-extrabold tracking-tight text-brand-deep">{m.range}</span>
+                  <span class="text-sm text-ink-soft">{m.goods}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-14">
+      <ContactCta title="Вызвать мастера" text="Опишите неисправность — подскажем примерную стоимость и время выезда. Работаем по Твери и Тверской области." />
+    </div>
+  </div>
+</Base>
