@@ -47,7 +47,7 @@ export const services = [
     title: 'Проектирование',
     short: 'Планировка торгового зала и подбор оборудования под ваш формат.',
     image: '/img/gen/service-project.webp',
-    video: '/video/service-project.mp4',
+    video: '/img/gen/service-project-anim.webp',
   },
   {
     href: '/services/montaz.html',

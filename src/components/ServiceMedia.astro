@@ -2,14 +2,15 @@
 import { localImage } from '../lib/catalog';
 import { u } from '../lib/url';
 interface Props { image: string; video?: string; alt: string; class?: string }
+// `video` is an animated WebP: unlike <video>, iOS plays it even in Low Power Mode and shows no controls
 const { image, video, alt, class: cls = '' } = Astro.props;
 const poster = u(localImage(image)!);
 ---
 {video ? (
-  <span class={`relative block overflow-hidden ${cls}`}>
-    <video src={u(video)} poster={poster} autoplay muted loop playsinline preload="metadata" aria-label={alt} class="absolute inset-0 h-full w-full object-cover motion-reduce:hidden"></video>
-    <img src={poster} alt={alt} loading="lazy" class="absolute inset-0 hidden h-full w-full object-cover motion-reduce:block" />
-  </span>
+  <picture class={`relative block overflow-hidden ${cls}`}>
+    <source srcset={poster} media="(prefers-reduced-motion: reduce)" />
+    <img src={u(video)} alt={alt} loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover" />
+  </picture>
 ) : (
   <img src={poster} alt={alt} loading="lazy" class={`object-cover ${cls}`} />
 )}
