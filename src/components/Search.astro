@@ -109,7 +109,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
           var a = el('a', 'flex items-center gap-3 rounded-xl p-2 hover:bg-frost focus:bg-frost focus:outline-none');
           a.href = base + x[2];
           var pic = el('span', 'grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-white ring-1 ring-line');
-          if (x[4]) { var img = el('img', 'h-full w-full object-contain p-1'); img.src = (x[4].indexOf('http') === 0 ? '' : base) + x[4]; img.alt = ''; img.loading = 'lazy'; pic.appendChild(img); }
+          if (x[4]) { var img = el('img', 'h-full w-full object-contain p-1'); img.src = (x[4].indexOf('http') === 0 ? '' : base) + x[4]; img.alt = ''; img.decoding = 'async'; img.onerror = retry; pic.appendChild(img); }
           var txt = el('span', 'min-w-0 flex-1');
           txt.appendChild(el('span', 'block truncate text-[15px] font-semibold', x[0]));
           txt.appendChild(el('span', 'block truncate text-xs text-muted', [x[1], x[5]].filter(Boolean).join(' · ')));
@@ -120,6 +120,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         box.appendChild(list);
         if (prods.length > 40) box.appendChild(el('p', 'px-2 py-3 text-center text-xs text-muted', 'Показаны первые 40 — уточните запрос'));
       }
+    }
+
+    // a flaky connection or a Pages redeploy can drop a thumbnail: retry once, then hide it instead of the broken-image icon
+    function retry() {
+      if (this.dataset.retry) return this.remove();
+      this.dataset.retry = '1';
+      this.src = this.src + '?r=' + Date.now();
     }
 
     function open() {
