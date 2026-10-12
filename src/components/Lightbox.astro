@@ -1,12 +1,14 @@
 ---
 import Icon from './Icon.astro';
 ---
-<dialog id="lightbox" class="fixed inset-0 m-auto h-fit max-h-none w-fit max-w-none overflow-visible bg-transparent p-0 backdrop:bg-ink/85" aria-label="Просмотр фото">
-  <img alt="" class="block max-h-[88vh] max-w-[94vw] rounded-xl bg-white object-contain p-2" />
-  <button type="button" class="absolute -top-3 -right-3 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow-lg hover:text-brand-deep" aria-label="Закрыть"><Icon name="close" class="h-5 w-5" /></button>
+<dialog id="lightbox" class="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden bg-ink p-0 backdrop:bg-ink" aria-label="Просмотр изображения">
+  <div data-backdrop class="absolute inset-0 grid place-items-center px-3 pt-16 pb-6 sm:px-10">
+    <img alt="" class="h-full w-full touch-pinch-zoom object-contain" />
+  </div>
+  <button type="button" data-close class="absolute top-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Закрыть"><Icon name="close" class="h-6 w-6" /></button>
 </dialog>
 <script is:inline>
-  // Links marked data-lightbox open their image in the dialog instead of navigating to the raw file
+  // Links marked data-lightbox open their image full-screen instead of navigating to the raw file
   (function () {
     var d = document.getElementById('lightbox');
     if (!d || !d.showModal) return;
@@ -20,7 +22,10 @@ import Icon from './Icon.astro';
       img.alt = src ? src.alt : '';
       d.showModal();
     });
-    d.addEventListener('click', function () { d.close(); });
+    // the image itself doesn't close the dialog, so it can be pinch-zoomed on phones
+    d.addEventListener('click', function (e) {
+      if (e.target === d || e.target.hasAttribute('data-backdrop') || e.target.closest('[data-close]')) d.close();
+    });
     d.addEventListener('close', function () { img.removeAttribute('src'); });
   })();
 </script>

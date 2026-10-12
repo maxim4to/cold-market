@@ -107,7 +107,7 @@ const ld = [orgLd, ...jsonld];
             <summary class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-xl border border-line [&::-webkit-details-marker]:hidden" aria-label="Меню">
               <Icon name="menu" class="h-5 w-5 group-open:hidden" /><Icon name="close" class="hidden h-5 w-5 group-open:block" />
             </summary>
-            <div class="absolute inset-x-0 top-full h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-line bg-white p-4 pb-28 md:h-[calc(100dvh-5rem)]">
+            <div class="absolute inset-x-0 top-full h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain border-t border-line bg-white p-4 pb-28 supports-[height:100dvh]:h-[calc(100dvh-4rem)] md:h-[calc(100vh-5rem)] md:supports-[height:100dvh]:h-[calc(100dvh-5rem)]">
               <nav class="grid gap-1" aria-label="Мобильное меню">
                 {nav.map((n) => <a href={u(n.href)} class="rounded-lg px-3 py-3 text-base font-semibold hover:bg-ice">{n.label}</a>)}
               </nav>
