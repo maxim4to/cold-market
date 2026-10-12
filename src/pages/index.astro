@@ -26,11 +26,14 @@ const advantages = [
   <section class="relative overflow-hidden bg-brand-night text-white">
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_10%,rgba(0,174,239,.35),transparent_60%),radial-gradient(40%_60%_at_0%_100%,rgba(0,119,182,.35),transparent_60%)]"></div>
     <Icon name="snow" class="pointer-events-none absolute -right-16 -top-10 h-80 w-80 text-white/[0.04] md:h-[28rem] md:w-[28rem]" />
-    <div class="container-x relative grid gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+    <div class="container-x relative grid gap-10 pt-5 pb-14 md:pb-20 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
       <div>
-        <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80">
-          <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>Тверь и Тверская область · {company.since}
-        </p>
+        <ul class="flex flex-wrap gap-2 text-xs font-semibold text-white/80">
+          <li class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1"><span class="h-1.5 w-1.5 rounded-full bg-brand"></span>Тверь и Тверская область</li>
+          {/* address and hours duplicate the desktop top bar, which is hidden below md */}
+          <li class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 md:hidden"><Icon name="pin" class="h-3.5 w-3.5 text-brand" />г. {company.address.city}, {company.address.street}</li>
+          <li class="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 md:hidden"><Icon name="clock" class="h-3.5 w-3.5 text-brand" />Пн–Чт 9:00–17:00, Пт 9:00–16:30</li>
+        </ul>
         <h1 class="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl">
           Холодильное и торговое оборудование <span class="text-brand">для магазинов, кафе и пекарен</span>
         </h1>
