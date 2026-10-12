@@ -94,7 +94,11 @@ const publicDir = path.resolve(process.cwd(), 'public');
 // Until the copy exists the original URL is used, so the site can go live before all photos are converted.
 export function localImage(src: string | null | undefined, size: 'full' | 'thumb' = 'full'): string | null {
   if (!src) return null;
-  if (src.startsWith('/img/')) return src;
+  if (src.startsWith('/img/')) {
+    // products added after the migration reference their WebP directly: /img/p/<name>.webp
+    const own = src.match(/^\/img\/p\/(?:t\/)?([^/]+\.webp)$/);
+    return own ? `/img/p/${size === 'thumb' ? 't/' : ''}${own[1]}` : src;
+  }
   let p = src.startsWith('http') ? new URL(src).pathname : src;
   p = decodeURIComponent(p);
   let local: string;
@@ -193,8 +197,8 @@ const FILL = 0.88;
 export function framedStyle(src: string | null | undefined, frameAspect = 1): string | null {
   if (!src) return null;
   const path = decodeURIComponent(src);
-  const m = path.match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/);
-  const c = path.match(/img_categories\/([^/]+)\.\w+$/);
+  const m = path.match(/img_products\/(?:full_|thumb_)*([^/]+)\.\w+$/) ?? path.match(/^\/img\/p\/(?:t\/)?([^/]+)\.webp$/);
+  const c = path.match(/img_categories\/([^/]+)\.\w+$/) ?? path.match(/^\/img\/c\/([^/]+)\.webp$/);
   const b = m ? imageBoxes[`p/${m[1]}`] : c ? imageBoxes[`c/${c[1]}`] : undefined;
   if (!b) return null;
   // frame height = 1, frame width = frameAspect, image height = s, image width = b.a * s

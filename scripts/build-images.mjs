@@ -1,5 +1,6 @@
-// Converts images downloaded by scraper/images.py into WebP copies under public/img.
-// Usage: node scripts/build-images.mjs <dir-with-original-images>
+// Converts original images into WebP copies under public/img and measures product boxes (data/image-boxes.json).
+// Usage: node scripts/build-images.mjs <dir>   e.g. `assets` for new photos in assets/products and assets/categories,
+// or the scraper/images.py download folder for the legacy site's images. FORCE=1 re-encodes everything.
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -25,12 +26,15 @@ const plan = [];
 for (const file of jobs) {
   const rel = path.relative(src, file).split(path.sep).join('/');
   const base = path.basename(file).replace(/\.\w+$/, '');
-  if (rel.includes('img_products/')) {
+  // assets/generated holds full-size sources of hand-placed site images, not conversion input
+  if (rel.startsWith('generated/')) continue;
+  // legacy downloads keep the old site's folders; new photos go to assets/products and assets/categories
+  if (/(^|\/)(img_products|products)\//.test(rel)) {
     if (base.startsWith('thumb_')) continue;
     const name = base.replace(/^(?:full_|thumb_)+/, '');
     plan.push({ file, dst: `p/${name}.webp`, width: 1200, box: `p/${name}` });
     plan.push({ file, dst: `p/t/${name}.webp`, width: 480 });
-  } else if (rel.includes('img_categories/')) {
+  } else if (/(^|\/)(img_categories|categories)\//.test(rel)) {
     plan.push({ file, dst: `c/${base}.webp`, width: 640, box: `c/${base}` });
   } else {
     plan.push({ file, dst: 'site/' + rel.replace(/\.\w+$/, '.webp'), width: 1400 });

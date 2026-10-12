@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "images": "node scripts/build-images.mjs"
+    "images": "node scripts/build-images.mjs assets",
+    "check": "node scripts/check-data.mjs",
+    "qa": "node scripts/qa.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
@@ -17,5 +19,8 @@
     "sanitize-html": "^2.18.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "playwright-core": "1.56"
   }
 }
