@@ -1,15 +1,15 @@
 ---
-import { localImage, allLabels, displayPrice, framedStyle, specFields, noBreakSlash, type Product } from '../lib/catalog';
+import { localImage, allLabels, displayPrice, priceNumber, framedStyle, specFields, noBreakSlash, type Product } from '../lib/catalog';
 import { u } from '../lib/url';
 import Icon from './Icon.astro';
-interface Props { product: Product }
-const { product: p } = Astro.props;
+interface Props { product: Product; index?: number }
+const { product: p, index } = Astro.props;
 const img = localImage(p.images[0]?.thumb || p.images[0]?.medium, 'thumb');
 const labels = allLabels(p);
 const frame = framedStyle(p.images[0]?.full);
 const keySpecs = specFields(p.specs.flatMap((g) => g.fields)).filter((f) => !/^(Модель|Производитель|Страна)/.test(f.name)).slice(0, 3);
 ---
-<a href={u(p.url)} class="group card relative flex flex-col overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
+<a href={u(p.url)} data-product data-i={index} data-brand={(p.manufacturer || '').trim().toLowerCase()} data-price={priceNumber(p.price) && priceNumber(p.price)! > 1 ? priceNumber(p.price) : ''} data-stock={labels.includes('В наличии') ? '1' : undefined} data-sale={labels.includes('Sale') ? '1' : undefined} class="group card relative flex flex-col overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
   {labels.length > 0 && (
     <div class="absolute left-3 top-3 z-10 flex gap-1">
       {labels.map((l) => <span class={`rounded-md px-2 py-0.5 text-[11px] font-bold text-white ${l === 'Sale' ? 'bg-sale' : 'bg-ok'}`}>{l === 'Sale' ? 'Скидка' : l}</span>)}

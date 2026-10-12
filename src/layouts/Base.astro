@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
+import Search from '../components/Search.astro';
 import LogoMark from '../components/LogoMark.astro';
 import { company, env, nav } from '../lib/site';
 import { topCatalogLinks } from '../lib/catalog';
@@ -96,6 +97,7 @@ const ld = [orgLd, ...jsonld];
         </nav>
 
         <div class="ml-auto flex items-center gap-2">
+          <Search />
           <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="hidden h-10 w-10 place-items-center rounded-xl bg-wa text-white hover:bg-wa-deep sm:grid" aria-label="Написать в WhatsApp"><Icon name="whatsapp" /></a>
           <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="hidden h-10 w-10 place-items-center rounded-xl bg-tg text-white hover:bg-tg-deep sm:grid" aria-label="Написать в Telegram"><Icon name="telegram" /></a>
           <a href={mainPhone.href} data-goal="click_phone" class="hidden flex-col items-end pl-2 md:flex">
@@ -179,6 +181,7 @@ const ld = [orgLd, ...jsonld];
           m[i].l = 1 * new Date();
           k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
         })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+        window.__ymId = id;
         ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true, params: { site_version: 'v2' } });
         document.addEventListener('click', function (e) {
           var el = e.target.closest && e.target.closest('[data-goal]');

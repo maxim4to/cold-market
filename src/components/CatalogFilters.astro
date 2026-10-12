@@ -1,0 +1,120 @@
+---
+import { allLabels, type Product } from '../lib/catalog';
+interface Props { products: Product[] }
+const { products } = Astro.props;
+
+// the same brand is spelled differently in old data ("POLAIR" / "Polair"): group case-insensitively,
+// label with the most common spelling
+const groups = new Map<string, { count: number; spellings: Map<string, number> }>();
+for (const p of products) {
+  if (!p.manufacturer) continue;
+  const key = p.manufacturer.trim().toLowerCase();
+  const g = groups.get(key) ?? { count: 0, spellings: new Map() };
+  g.count++;
+  g.spellings.set(p.manufacturer.trim(), (g.spellings.get(p.manufacturer.trim()) || 0) + 1);
+  groups.set(key, g);
+}
+const brands = [...groups].map(([key, g]) => [key, [...g.spellings].sort((a, b) => b[1] - a[1])[0][0], g.count] as const)
+  .sort((a, b) => b[2] - a[2] || a[1].localeCompare(b[1], 'ru'));
+const stock = products.filter((p) => allLabels(p).includes('В наличии')).length;
+const sale = products.filter((p) => allLabels(p).includes('Sale')).length;
+const chip = 'shrink-0 rounded-full border border-line bg-white px-3 py-1.5 text-sm font-semibold text-ink-soft transition hover:border-brand aria-pressed:border-brand-deep aria-pressed:bg-brand-deep aria-pressed:text-white';
+---
+<div data-filters hidden class="mt-6 space-y-3">
+  <div class="flex flex-wrap items-center gap-2">
+    <label class="relative">
+      <span class="sr-only">Сортировка</span>
+      <select data-sort class="h-10 appearance-none rounded-xl border border-line bg-white pr-9 pl-3 text-sm font-semibold text-ink hover:border-brand focus:border-brand-deep focus:outline-none">
+        <option value="">По умолчанию</option>
+        <option value="asc">Сначала дешевле</option>
+        <option value="desc">Сначала дороже</option>
+      </select>
+      <svg class="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m7 10 5 5 5-5H7Z" /></svg>
+    </label>
+    {stock > 0 && <button type="button" data-toggle="stock" aria-pressed="false" class={chip}>В наличии · {stock}</button>}
+    {sale > 0 && <button type="button" data-toggle="sale" aria-pressed="false" class={chip}>Со скидкой · {sale}</button>}
+    <span data-count class="ml-auto text-sm text-muted"></span>
+    <button type="button" data-reset hidden class="text-sm font-semibold text-brand-deep hover:underline">Сбросить</button>
+  </div>
+  {brands.length > 1 && (
+    <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Бренд">
+      {brands.map(([key, label, n]) => <button type="button" data-brand-chip={key} aria-pressed="false" class={chip}>{label} <span class="opacity-60">{n}</span></button>)}
+    </div>
+  )}
+</div>
+<p data-empty hidden class="mt-8 rounded-xl bg-frost p-6 text-center text-ink-soft">Под выбранные фильтры ничего не подходит. <button type="button" data-reset class="font-semibold text-brand-deep hover:underline">Сбросить фильтры</button></p>
+
+<script is:inline>
+  // the panel precedes the product grid in the markup, so wait until the grid is parsed
+  (document.readyState === 'loading' ? function (fn) { document.addEventListener('DOMContentLoaded', fn); } : function (fn) { fn(); })(function () {
+    var f = document.querySelector('[data-filters]');
+    var grid = document.querySelector('[data-catalog]');
+    if (!f || !grid) return;
+    f.hidden = false;
+    var empty = document.querySelector('[data-empty]');
+    var cards = [].slice.call(grid.querySelectorAll('[data-product]'));
+    var sortSel = f.querySelector('[data-sort]');
+    var count = f.querySelector('[data-count]');
+    var resets = document.querySelectorAll('[data-reset]');
+    var state = { brands: [], sort: '', stock: false, sale: false };
+
+    var q = new URLSearchParams(location.search);
+    state.brands = q.getAll('brand').map(function (b) { return b.toLowerCase(); });
+    state.sort = q.get('sort') || '';
+    state.stock = q.get('stock') === '1';
+    state.sale = q.get('sale') === '1';
+
+    function price(c) { var v = c.getAttribute('data-price'); return v ? +v : null; }
+    function goods(n) { var d = n % 10, h = n % 100; return n + ' ' + (d === 1 && h !== 11 ? 'товар' : d >= 2 && d <= 4 && (h < 12 || h > 14) ? 'товара' : 'товаров'); }
+    function apply() {
+      var shown = 0;
+      cards.forEach(function (c) {
+        var ok = (!state.brands.length || state.brands.indexOf(c.getAttribute('data-brand')) >= 0) &&
+          (!state.stock || c.hasAttribute('data-stock')) && (!state.sale || c.hasAttribute('data-sale'));
+        c.hidden = !ok;
+        if (ok) shown++;
+      });
+      var order = cards.slice();
+      if (state.sort) {
+        var dir = state.sort === 'asc' ? 1 : -1;
+        // products without a public price ("по запросу") always go last
+        order.sort(function (a, b) {
+          var pa = price(a), pb = price(b);
+          if (pa === null || pb === null) return (pa === null) - (pb === null);
+          return (pa - pb) * dir;
+        });
+      } else order.sort(function (a, b) { return a.getAttribute('data-i') - b.getAttribute('data-i'); });
+      order.forEach(function (c) { grid.appendChild(c); });
+
+      var active = state.brands.length || state.sort || state.stock || state.sale;
+      count.textContent = active ? 'Показано ' + shown + ' из ' + cards.length : goods(cards.length);
+      resets.forEach(function (r) { r.hidden = !active; });
+      empty.hidden = shown > 0;
+      sortSel.value = state.sort;
+      f.querySelectorAll('[data-brand-chip]').forEach(function (b) { b.setAttribute('aria-pressed', state.brands.indexOf(b.getAttribute('data-brand-chip')) >= 0); });
+      f.querySelectorAll('[data-toggle]').forEach(function (b) { b.setAttribute('aria-pressed', !!state[b.getAttribute('data-toggle')]); });
+
+      var p = new URLSearchParams();
+      state.brands.forEach(function (b) { p.append('brand', b); });
+      if (state.sort) p.set('sort', state.sort);
+      if (state.stock) p.set('stock', '1');
+      if (state.sale) p.set('sale', '1');
+      var qs = p.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    }
+
+    f.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-brand-chip]');
+      if (b) {
+        var name = b.getAttribute('data-brand-chip'), i = state.brands.indexOf(name);
+        if (i >= 0) state.brands.splice(i, 1); else state.brands.push(name);
+        return apply();
+      }
+      var t = e.target.closest('[data-toggle]');
+      if (t) { var k = t.getAttribute('data-toggle'); state[k] = !state[k]; apply(); }
+    });
+    sortSel.addEventListener('change', function () { state.sort = sortSel.value; apply(); });
+    resets.forEach(function (r) { r.addEventListener('click', function () { state = { brands: [], sort: '', stock: false, sale: false }; apply(); }); });
+    apply();
+  });
+</script>

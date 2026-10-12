@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import CategoryTile from '../components/CategoryTile.astro';
 import ProductCard from '../components/ProductCard.astro';
+import CatalogFilters from '../components/CatalogFilters.astro';
 import ContactCta from '../components/ContactCta.astro';
 import Icon from '../components/Icon.astro';
 import Lightbox from '../components/Lightbox.astro';
@@ -109,9 +110,10 @@ const specGroups = product ? product.specs.map((g) => ({ group: g.group, fields:
         </div>
       )}
 
+      {catProducts.length >= 12 && <CatalogFilters products={catProducts} />}
       {catProducts.length > 0 && (
-        <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
-          {catProducts.map((p) => <ProductCard product={p} />)}
+        <div data-catalog class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {catProducts.map((p, i) => <ProductCard product={p} index={i} />)}
         </div>
       )}
 

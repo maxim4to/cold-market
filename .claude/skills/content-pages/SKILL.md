@@ -14,6 +14,8 @@ description: Править страницы и тексты сайта Холо
 | Карточки услуг на главной | `src/lib/site.ts` → `services` (`image`, необязательный `video` — анимированный WebP) |
 | Главная: теги, заголовок, 4 цифры, кнопки, каталог, услуги, карта | `src/pages/index.astro` |
 | Шапка, мобильное меню, подвал, нижняя панель контактов, Метрика, Jivo | `src/layouts/Base.astro` |
+| Поиск (лупа в шапке, окно, алгоритм: все слова запроса, «ё/е», латиница↔кириллица, отсечение окончаний) | `src/components/Search.astro`, индекс `src/pages/search-index.json.ts` |
+| Фильтры категорий | `src/components/CatalogFilters.astro` |
 | Страницы услуг | `src/pages/services/{project,montaz,to,ro}.astro` на `ServiceLayout` |
 | Галерея услуг (большое фото + миниатюры + стрелки + свайп + полноэкранный просмотр) | `src/components/ServiceGallery.astro` |
 | «О компании» (старый текст + сертификаты в полноэкранном просмотре) | `src/pages/about.astro` → `InfoLayout` + `data/pages.json` |

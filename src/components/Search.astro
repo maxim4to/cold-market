@@ -1,0 +1,151 @@
+---
+import Icon from './Icon.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+<button type="button" data-search-open hidden class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line text-ink hover:border-brand hover:text-brand-deep" aria-label="Поиск по каталогу">
+  <Icon name="search" class="h-5 w-5" />
+</button>
+
+<dialog id="search" data-base={base} class="m-0 h-dvh max-h-none w-screen max-w-none bg-white p-0 backdrop:bg-ink/60 md:mx-auto md:mt-16 md:h-auto md:max-h-[80vh] md:w-full md:max-w-2xl md:rounded-2xl md:shadow-2xl" aria-label="Поиск по каталогу">
+  <div class="flex h-full flex-col md:max-h-[80vh]">
+    <div class="flex items-center gap-2 border-b border-line p-3">
+      <label class="flex flex-1 items-center gap-2 rounded-xl bg-frost px-3 ring-1 ring-line focus-within:ring-2 focus-within:ring-brand">
+        <Icon name="search" class="h-5 w-5 shrink-0 text-muted" />
+        <input data-search-input type="search" enterkeyhint="search" autocomplete="off" placeholder="Например: ларь Haier, тестомес, витрина" class="h-12 w-full bg-transparent text-base outline-none placeholder:text-muted" aria-label="Что ищем" />
+      </label>
+      <button type="button" data-search-close class="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-frost" aria-label="Закрыть поиск"><Icon name="close" class="h-6 w-6" /></button>
+    </div>
+    <div data-search-results class="flex-1 overflow-y-auto overscroll-contain p-3">
+      <p data-search-hint class="px-2 py-6 text-center text-sm text-muted">Начните вводить название, модель или бренд</p>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (function () {
+    var d = document.getElementById('search');
+    var openBtn = document.querySelector('[data-search-open]');
+    if (!d || !d.showModal || !openBtn) return;
+    openBtn.hidden = false;
+    var base = d.getAttribute('data-base') || '';
+    var input = d.querySelector('[data-search-input]');
+    var box = d.querySelector('[data-search-results]');
+    var hint = d.querySelector('[data-search-hint]');
+    var index = null, loading = null, timer, reported = false;
+
+    var LAT = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya' };
+    function norm(s) { return String(s).toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9.,/+\-]+/g, ' ').trim(); }
+    function lat(s) { return s.replace(/[а-я]/g, function (ch) { return LAT[ch] || ch; }); }
+    // crude Russian stemming for query words only, so "ларь" finds "лари" and "шкафы" finds "шкаф"
+    function stem(w) {
+      if (!/^[а-я]{4,}$/.test(w)) return w;
+      var m = w.match(/^(.+?)(ами|ями|ого|его|ому|ему|ов|ев|ей|ой|ий|ый|ая|яя|ое|ее|ые|ие|ам|ям|ах|ях|ом|ем|а|я|ы|и|ь|е|у|ю|о)$/);
+      return m && m[1].length >= 3 ? m[1] : w;
+    }
+
+    function load() {
+      if (loading) return loading;
+      loading = fetch(base + '/search-index.json').then(function (r) { return r.json(); }).then(function (data) {
+        index = {
+          p: data.p.map(function (x) {
+            x[5] = data.k[x[5]];
+            x[2] = x[2] + '.html';
+            if (x[4] && x[4].charAt(0) !== '/' && x[4].indexOf('http') !== 0) x[4] = '/img/p/t/' + x[4] + '.webp';
+            if (/\d$/.test(x[3])) x[3] += ' руб.';
+            var h = norm(x[0] + ' ' + x[1] + ' ' + x[5]);
+            return { x: x, h: ' ' + h, name: norm(x[0]) };
+          }),
+          c: data.c.map(function (x) { return { x: x, h: ' ' + norm(x[0]) }; }),
+        };
+      });
+      return loading;
+    }
+
+    // every query word must occur in the item (also as Latin transliteration: "полаир" -> Polair)
+    function matches(h, words) {
+      for (var i = 0; i < words.length; i++) {
+        var w = words[i];
+        if (h.indexOf(w) < 0 && h.indexOf(lat(w)) < 0) return false;
+      }
+      return true;
+    }
+    function score(it, words) {
+      var s = 0;
+      for (var i = 0; i < words.length; i++) {
+        if (it.h.indexOf(' ' + words[i]) >= 0 || it.h.indexOf(' ' + lat(words[i])) >= 0) s += 2;
+      }
+      if (it.name.indexOf(words[0]) === 0) s += 3;
+      return s - it.name.length / 200;
+    }
+
+    function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+    function render(q) {
+      box.textContent = '';
+      var words = norm(q).split(/\s+/).filter(Boolean).map(stem);
+      if (!words.length) { box.appendChild(hint); return; }
+      var cats = index.c.filter(function (c) { return matches(c.h, words); }).slice(0, 5);
+      var prods = index.p.filter(function (p) { return matches(p.h, words); })
+        .map(function (p) { return { p: p, s: score(p, words) }; })
+        .sort(function (a, b) { return b.s - a.s; });
+      if (!cats.length && !prods.length) {
+        box.appendChild(el('p', 'px-2 py-6 text-center text-sm text-muted', 'Ничего не нашлось. Попробуйте другое слово или позвоните — подберём оборудование.'));
+        return;
+      }
+      if (cats.length) {
+        box.appendChild(el('p', 'px-2 pt-1 pb-2 text-xs font-bold uppercase tracking-wider text-muted', 'Разделы'));
+        var wrap = el('div', 'mb-3 flex flex-wrap gap-2 px-1');
+        cats.forEach(function (c) {
+          var a = el('a', 'rounded-lg bg-ice px-3 py-2 text-sm font-semibold text-brand-deep hover:bg-brand-deep hover:text-white', c.x[0] + ' · ' + c.x[2]);
+          a.href = base + c.x[1];
+          wrap.appendChild(a);
+        });
+        box.appendChild(wrap);
+      }
+      if (prods.length) {
+        box.appendChild(el('p', 'px-2 pt-1 pb-2 text-xs font-bold uppercase tracking-wider text-muted', 'Товары · ' + prods.length));
+        var list = el('ul', 'grid grid-cols-[minmax(0,1fr)] gap-1');
+        prods.slice(0, 40).forEach(function (r) {
+          var x = r.p.x;
+          var a = el('a', 'flex items-center gap-3 rounded-xl p-2 hover:bg-frost focus:bg-frost focus:outline-none');
+          a.href = base + x[2];
+          var pic = el('span', 'grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-white ring-1 ring-line');
+          if (x[4]) { var img = el('img', 'h-full w-full object-contain p-1'); img.src = (x[4].indexOf('http') === 0 ? '' : base) + x[4]; img.alt = ''; img.loading = 'lazy'; pic.appendChild(img); }
+          var txt = el('span', 'min-w-0 flex-1');
+          txt.appendChild(el('span', 'block truncate text-[15px] font-semibold', x[0]));
+          txt.appendChild(el('span', 'block truncate text-xs text-muted', [x[1], x[5]].filter(Boolean).join(' · ')));
+          var price = el('span', 'shrink-0 text-right text-xs font-extrabold whitespace-nowrap sm:text-sm', x[3]);
+          a.appendChild(pic); a.appendChild(txt); a.appendChild(price);
+          var li = el('li'); li.appendChild(a); list.appendChild(li);
+        });
+        box.appendChild(list);
+        if (prods.length > 40) box.appendChild(el('p', 'px-2 py-3 text-center text-xs text-muted', 'Показаны первые 40 — уточните запрос'));
+      }
+    }
+
+    function open() {
+      d.showModal();
+      input.focus();
+      load().then(function () { if (input.value) render(input.value); });
+    }
+    openBtn.addEventListener('click', open);
+    document.addEventListener('keydown', function (e) {
+      var t = e.target;
+      if (e.key === '/' && !d.open && !(t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) { e.preventDefault(); open(); }
+    });
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { load().then(function () { render(input.value); }); }, 80);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var first = box.querySelector('ul a, a');
+      if (first) { e.preventDefault(); first.click(); }
+    });
+    box.addEventListener('click', function (e) {
+      if (!e.target.closest('a') || reported || !window.ym || !window.__ymId) return;
+      reported = true;
+      window.ym(window.__ymId, 'reachGoal', 'search_click', { query: input.value });
+    });
+    d.addEventListener('click', function (e) { if (e.target === d || e.target.closest('[data-search-close]')) d.close(); });
+  })();
+</script>
