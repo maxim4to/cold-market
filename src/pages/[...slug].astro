@@ -1,0 +1,186 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CategoryTile from '../components/CategoryTile.astro';
+import ProductCard from '../components/ProductCard.astro';
+import ContactCta from '../components/ContactCta.astro';
+import Icon from '../components/Icon.astro';
+import {
+  categories, products, productByUrl, categoryByUrl, categoryTrail, primaryCategory,
+  allLabels, priceNumber, localImage, cleanHtml, plain, type Product, type Category,
+} from '../lib/catalog';
+import { company } from '../lib/site';
+import { u, abs } from '../lib/url';
+
+export function getStaticPaths() {
+  const slug = (url: string) => url.replace(/^\//, '').replace(/\.html$/, '');
+  return [
+    ...categories.filter((c) => c.url !== '/').map((c) => ({ params: { slug: slug(c.url) }, props: { kind: 'category', url: c.url } })),
+    ...products.map((p) => ({ params: { slug: slug(p.url) }, props: { kind: 'product', url: p.url } })),
+  ];
+}
+
+const { kind, url } = Astro.props as { kind: 'category' | 'product'; url: string };
+
+let category: Category | undefined;
+let product: Product | undefined;
+let title = '';
+let description = '';
+let jsonld: object[] = [];
+let ogImage: string | null = null;
+
+if (kind === 'category') {
+  category = categoryByUrl.get(url)!;
+  title = category.title || `${category.name} — купить в Твери | ХолодМаркет`;
+  description = category.meta_description || `${category.name} в Твери: цены, характеристики, наличие на складе. Доставка, монтаж и сервисное обслуживание. ХолодМаркет — ${company.since}.`;
+} else {
+  product = productByUrl.get(url)!;
+  const specs = product.specs.flatMap((g) => g.fields).filter((f) => !/^(Модель|Производитель)$/.test(f.name)).slice(0, 3);
+  title = product.title;
+  description = product.meta_description ||
+    [`${product.name} — купить в Твери`, product.price && priceNumber(product.price)! > 1 ? `цена ${product.price}` : '', specs.map((s) => `${s.name.toLowerCase()} ${s.value}`).join(', ')]
+      .filter(Boolean).join('. ') + '. Доставка, монтаж, гарантия — ХолодМаркет.';
+  ogImage = localImage(product.images[0]?.full);
+  const price = priceNumber(product.price);
+  jsonld.push({
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images.map((i) => abs(localImage(i.full)!, Astro.site)),
+    description: product.description_text?.slice(0, 500) || undefined,
+    sku: product.id ? String(product.id) : undefined,
+    brand: product.manufacturer ? { '@type': 'Brand', name: product.manufacturer } : undefined,
+    // "1 руб." is used on the old site as a placeholder, so no Offer for it
+    offers: price && price > 1 ? {
+      '@type': 'Offer', price, priceCurrency: 'RUB', url: abs(product.url, Astro.site),
+      availability: allLabels(product).includes('В наличии') ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
+      seller: { '@id': abs('/', Astro.site) + '#org' },
+    } : undefined,
+  });
+}
+
+const catTrail = category ? categoryTrail(category.url) : categoryTrail(primaryCategory(product!) || '');
+const crumbs = category ? catTrail : [...catTrail, { url: product!.url, name: product!.name }];
+
+const catProducts = category ? category.products.map((p) => productByUrl.get(p)).filter(Boolean) as Product[] : [];
+const subCount = (c: { url: string }) => {
+  const x = categoryByUrl.get(c.url);
+  return x ? x.products.length || x.subcategories.length : 0;
+};
+const catDescription = category ? cleanHtml(category.description_html) : '';
+
+const related = product
+  ? (categoryByUrl.get(primaryCategory(product) || '')?.products || []).filter((x) => x !== product!.url).slice(0, 4).map((x) => productByUrl.get(x)).filter(Boolean) as Product[]
+  : [];
+const descHtml = product ? cleanHtml(product.description_html) : '';
+---
+<Base title={title} description={description} canonical={url} image={ogImage} jsonld={jsonld} ogType={product ? 'product' : 'website'}>
+  <div class="border-b border-line bg-gradient-to-b from-ice to-white">
+    <div class="container-x py-5"><Breadcrumbs items={crumbs} /></div>
+  </div>
+
+  {category && (
+    <div class="container-x py-8">
+      <h1 class="text-3xl font-extrabold tracking-tight md:text-4xl">{category.name}</h1>
+      {catProducts.length > 0 && <p class="mt-2 text-sm text-muted">{catProducts.length} {catProducts.length % 10 === 1 && catProducts.length % 100 !== 11 ? 'позиция' : [2, 3, 4].includes(catProducts.length % 10) && ![12, 13, 14].includes(catProducts.length % 100) ? 'позиции' : 'позиций'} в каталоге</p>}
+
+      {category.subcategories.length > 0 && (
+        <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {category.subcategories.map((s) => <CategoryTile url={s.url} name={s.name} image={s.image} count={subCount(s)} />)}
+        </div>
+      )}
+
+      {catProducts.length > 0 && (
+        <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+          {catProducts.map((p) => <ProductCard product={p} />)}
+        </div>
+      )}
+
+      {plain(catDescription) && <div class="prose-cm mt-12 max-w-3xl" set:html={catDescription} />}
+
+      <div class="mt-12"><ContactCta title="Не нашли нужную модель?" text="Подберём оборудование под ваш объект и бюджет, в том числе под заказ. Позвоните или напишите в мессенджер." /></div>
+    </div>
+  )}
+
+  {product && (
+    <article class="container-x py-8">
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-12">
+        <div class="min-w-0">
+          {product.images.length > 0 ? (
+            <div>
+              <div class="card flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none]">
+                {product.images.map((im, i) => (
+                  <a id={`photo-${i + 1}`} href={u(localImage(im.full)!)} class="grid aspect-square w-full shrink-0 snap-center place-items-center p-6">
+                    <img src={u(localImage(im.full)!)} alt={`${product!.name}${i ? ` — фото ${i + 1}` : ''}`} loading={i ? 'lazy' : 'eager'} fetchpriority={i ? 'auto' : 'high'} decoding="async" class="max-h-full max-w-full object-contain" />
+                  </a>
+                ))}
+              </div>
+              {product.images.length > 1 && (
+                <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  {product.images.map((im, i) => (
+                    <a href={`#photo-${i + 1}`} class="grid h-16 w-16 shrink-0 place-items-center rounded-lg border border-line bg-white p-1 hover:border-brand" aria-label={`Фото ${i + 1}`}>
+                      <img src={u(localImage(im.thumb || im.full, 'thumb')!)} alt="" loading="lazy" class="max-h-full max-w-full object-contain" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div class="card grid aspect-square place-items-center"><Icon name="box" class="h-16 w-16 text-line" /></div>
+          )}
+        </div>
+
+        <div class="min-w-0">
+          <div class="flex flex-wrap gap-1.5">
+            {allLabels(product).map((l) => <span class={`rounded-md px-2 py-0.5 text-xs font-bold text-white ${l === 'Sale' ? 'bg-sale' : 'bg-ok'}`}>{l === 'Sale' ? 'Скидка' : l}</span>)}
+          </div>
+          <h1 class="mt-2 text-2xl font-extrabold leading-tight tracking-tight md:text-3xl">{product.name}</h1>
+          {product.manufacturer && <p class="mt-2 text-sm text-muted">Производитель: <span class="font-semibold text-ink-soft">{product.manufacturer}</span></p>}
+          {product.product_code && <p class="mt-1 text-sm text-muted">Артикул: <span class="font-semibold text-ink-soft">{product.product_code}</span></p>}
+
+          <div class="mt-6 flex items-end gap-3">
+            <span class="text-3xl font-extrabold tracking-tight md:text-4xl">{product.price}</span>
+            {product.old_price && <span class="pb-1 text-lg text-muted line-through">{product.old_price}</span>}
+          </div>
+          <p class="mt-2 text-xs leading-relaxed text-muted">Цена ознакомительная. Актуальную стоимость и наличие уточняйте у менеджера.</p>
+
+          <div class="mt-6"><ContactCta compact /></div>
+
+          {product.specs.length > 0 && (
+            <div class="mt-8 space-y-6">
+              {product.specs.map((g) => (
+                <section>
+                  <h2 class="mb-2 text-base font-bold">{g.group || 'Характеристики'}</h2>
+                  <dl class="divide-y divide-line overflow-hidden rounded-xl border border-line text-sm">
+                    {g.fields.map((f) => (
+                      <div class="grid grid-cols-[1fr_auto] gap-4 px-4 py-2.5 odd:bg-frost sm:grid-cols-2">
+                        <dt class="text-muted">{f.name}</dt>
+                        <dd class="text-right font-semibold sm:text-left">{f.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {plain(descHtml) && (
+        <section class="mt-12 max-w-4xl">
+          <h2 class="text-xl font-extrabold">Описание</h2>
+          <div class="prose-cm mt-3" set:html={descHtml} />
+        </section>
+      )}
+
+      {related.length > 0 && (
+        <section class="mt-14">
+          <h2 class="text-xl font-extrabold">Ещё в разделе «{catTrail.at(-1)?.name}»</h2>
+          <div class="mt-5 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+            {related.map((p) => <ProductCard product={p} />)}
+          </div>
+        </section>
+      )}
+    </article>
+  )}
+</Base>

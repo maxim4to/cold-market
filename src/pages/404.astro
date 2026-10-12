@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import { u } from '../lib/url';
+---
+<Base title="Страница не найдена — ХолодМаркет">
+  <div class="container-x py-24 text-center">
+    <p class="text-6xl font-extrabold text-brand">404</p>
+    <h1 class="mt-4 text-2xl font-extrabold">Страница не найдена</h1>
+    <p class="mt-2 text-ink-soft">Возможно, товар снят с продажи или адрес изменился.</p>
+    <a href={u('/')} class="btn-primary mt-8">Перейти в каталог</a>
+  </div>
+</Base>

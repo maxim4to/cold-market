@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import ContactCta from './ContactCta.astro';
+import { infoPages, infoContent, infoImages, localImage } from '../lib/catalog';
+import { u } from '../lib/url';
+interface Props { url: string; h1?: string; crumbs?: { url: string; name: string }[]; description?: string; showImages?: boolean; eyebrow?: string }
+const { url, crumbs = [], showImages = true, eyebrow } = Astro.props;
+const page = infoPages[url];
+const h1 = Astro.props.h1 || page.h1;
+const html = infoContent(url);
+const images = showImages ? infoImages(url) : [];
+const description = Astro.props.description || page.meta_description;
+---
+<Base title={page.title} description={description} canonical={url}>
+  <div class="border-b border-line bg-gradient-to-b from-ice to-white">
+    <div class="container-x py-5"><Breadcrumbs items={[...crumbs, { url, name: h1 }]} /></div>
+    <div class="container-x pb-10 pt-4">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 class="mt-2 text-3xl font-extrabold tracking-tight md:text-5xl">{h1}</h1>
+    </div>
+  </div>
+  <div class="container-x grid gap-10 py-10 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div>
+      <slot name="before" />
+      <div class="prose-cm max-w-3xl text-base" set:html={html} />
+      {images.length > 0 && (
+        <div class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3">
+          {images.map((src) => <img src={u(localImage(src)!)} alt={h1} loading="lazy" class="card aspect-[4/3] w-full object-cover" />)}
+        </div>
+      )}
+      <slot />
+    </div>
+    <aside class="lg:sticky lg:top-28 lg:self-start">
+      <ContactCta title="Нужна консультация?" text="Расскажите о задаче — подберём решение, рассчитаем стоимость и сроки." />
+    </aside>
+  </div>
+</Base>

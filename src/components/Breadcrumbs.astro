@@ -1,0 +1,21 @@
+---
+import { u, abs } from '../lib/url';
+interface Props { items: { url: string; name: string }[] }
+const items = [{ url: '/', name: 'Главная' }, ...Astro.props.items];
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((i, n) => ({ '@type': 'ListItem', position: n + 1, name: i.name, item: abs(i.url, Astro.site) })),
+};
+---
+<nav aria-label="Хлебные крошки" class="text-[13px] text-muted">
+  <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+    {items.map((i, n) => (
+      <li class="flex items-center gap-1.5">
+        {n > 0 && <span aria-hidden="true" class="text-line">/</span>}
+        {n < items.length - 1 ? <a href={u(i.url)} class="hover:text-brand-deep">{i.name}</a> : <span class="text-ink-soft" aria-current="page">{i.name}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(ld)} />

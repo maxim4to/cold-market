@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+import CategoryTile from '../components/CategoryTile.astro';
+import ContactCta from '../components/ContactCta.astro';
+import MapBlock from '../components/MapBlock.astro';
+import Icon from '../components/Icon.astro';
+import { topCategories, categoryByUrl, products, localImage } from '../lib/catalog';
+import { company, services } from '../lib/site';
+import { u } from '../lib/url';
+
+const count = (url: string): number => {
+  const c = categoryByUrl.get(url);
+  if (!c) return 0;
+  return c.products.length + c.subcategories.filter((s) => s.url !== url).reduce((a, s) => a + count(s.url), 0);
+};
+const counts = new Map(topCategories.map((c) => [c.url, count(c.url)]));
+const advantages = [
+  { icon: 'box', title: 'Склад в Твери', text: 'Постоянные складские запасы — оснастим объект без долгого ожидания.' },
+  { icon: 'truck', title: 'Доставка и монтаж', text: 'Привезём, установим и запустим оборудование, обучим персонал.' },
+  { icon: 'shield', title: 'Гарантийный сервис', text: 'Гарантийное и послегарантийное обслуживание собственной службой.' },
+  { icon: 'wrench', title: 'Ремонт с выездом', text: 'Диагностика и ремонт холодильного и технологического оборудования.' },
+];
+---
+<Base
+  title="Холодильное и торговое оборудование в Твери — ХолодМаркет"
+  description="Холодильное, торговое и технологическое оборудование в Твери: морозильные лари, холодильные шкафы, витрины, горки, бонеты, оборудование для общепита и пекарен. Монтаж, обслуживание и ремонт."
+  canonical="/"
+>
+  <section class="relative overflow-hidden bg-brand-night text-white">
+    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_10%,rgba(0,174,239,.35),transparent_60%),radial-gradient(40%_60%_at_0%_100%,rgba(0,119,182,.35),transparent_60%)]"></div>
+    <Icon name="snow" class="pointer-events-none absolute -right-16 -top-10 h-80 w-80 text-white/[0.04] md:h-[28rem] md:w-[28rem]" />
+    <div class="container-x relative grid gap-10 py-14 md:py-20 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80">
+          <span class="h-1.5 w-1.5 rounded-full bg-brand"></span>Тверь и Тверская область · {company.since}
+        </p>
+        <h1 class="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl md:text-5xl">
+          Холодильное и торговое оборудование <span class="text-brand">для магазинов, кафе и пекарен</span>
+        </h1>
+        <p class="mt-5 max-w-xl text-base text-white/75 md:text-lg">
+          Подберём, привезём, смонтируем и будем обслуживать. Более {Math.floor(products.length / 100) * 100} позиций в каталоге — лари, шкафы, витрины, горки, оборудование для общепита.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#catalog" class="btn bg-brand px-6 text-brand-night hover:bg-white">Смотреть каталог <Icon name="arrow" class="h-4 w-4" /></a>
+          <a href={company.phones[0].href} data-goal="click_phone" class="btn border border-white/25 px-6 text-white hover:bg-white/10"><Icon name="phone" class="h-4 w-4" />{company.phones[0].label}</a>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        {[['20+', 'лет на рынке'], [String(products.length), 'позиций в каталоге'], ['4', 'вида сервисных услуг'], ['от 350 ₽', 'стоимость ремонтных работ']].map(([a, b]) => (
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+            <p class="text-2xl font-extrabold text-white md:text-3xl">{a}</p>
+            <p class="mt-1 text-sm text-white/60">{b}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="catalog" class="container-x scroll-mt-24 py-14">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="eyebrow">Каталог</p>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Каталог оборудования</h2>
+      </div>
+      <p class="max-w-md text-sm text-muted">Цены ознакомительные — актуальную стоимость и наличие подскажет менеджер.</p>
+    </div>
+    <div class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4 lg:grid-cols-4">
+      {topCategories.map((c) => <CategoryTile url={c.url} name={c.name} image={c.image} count={counts.get(c.url)} />)}
+    </div>
+  </section>
+
+  <section class="bg-ice py-14">
+    <div class="container-x">
+      <p class="eyebrow">Почему мы</p>
+      <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Оснащаем объекты под ключ</h2>
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {advantages.map((a) => (
+          <div class="card p-6">
+            <span class="grid h-11 w-11 place-items-center rounded-xl bg-ice text-brand-deep"><Icon name={a.icon} class="h-6 w-6" /></span>
+            <p class="mt-4 font-extrabold">{a.title}</p>
+            <p class="mt-1.5 text-sm text-ink-soft">{a.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="container-x py-14">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="eyebrow">Сервисная служба</p>
+        <h2 class="mt-2 text-2xl font-extrabold tracking-tight md:text-3xl">Услуги</h2>
+      </div>
+      <a href={u('/services.html')} class="flex items-center gap-1 text-sm font-semibold text-brand-deep">Все услуги <Icon name="arrow" class="h-4 w-4" /></a>
+    </div>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {services.map((s) => (
+        <a href={u(s.href)} class="group card overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
+          <img src={u(localImage(s.image)!)} alt={s.title} loading="lazy" class="aspect-[16/10] w-full object-cover" />
+          <div class="p-5">
+            <p class="font-extrabold group-hover:text-brand-deep">{s.title}</p>
+            <p class="mt-1.5 text-sm text-ink-soft">{s.short}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="container-x grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+    <ContactCta title="Подберём оборудование под ваш объект" text="Позвоните или напишите в мессенджер — расскажем о наличии, ценах, доставке и монтаже." />
+    <MapBlock />
+  </section>
+</Base>

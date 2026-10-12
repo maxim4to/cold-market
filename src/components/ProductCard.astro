@@ -1,0 +1,36 @@
+---
+import { localImage, allLabels, type Product } from '../lib/catalog';
+import { u } from '../lib/url';
+import Icon from './Icon.astro';
+interface Props { product: Product }
+const { product: p } = Astro.props;
+const img = localImage(p.images[0]?.thumb || p.images[0]?.medium, 'thumb');
+const labels = allLabels(p);
+const keySpecs = p.specs.flatMap((g) => g.fields).filter((f) => !/^(Модель|Производитель|Страна)/.test(f.name)).slice(0, 3);
+---
+<a href={u(p.url)} class="group card relative flex flex-col overflow-hidden transition hover:border-brand/60 hover:shadow-lg hover:shadow-brand/10">
+  {labels.length > 0 && (
+    <div class="absolute left-3 top-3 z-10 flex gap-1">
+      {labels.map((l) => <span class={`rounded-md px-2 py-0.5 text-[11px] font-bold text-white ${l === 'Sale' ? 'bg-sale' : 'bg-ok'}`}>{l === 'Sale' ? 'Скидка' : l}</span>)}
+    </div>
+  )}
+  <div class="grid aspect-square place-items-center bg-white p-4">
+    {img ? <img src={u(img)} alt={p.name} loading="lazy" decoding="async" class="h-full w-full object-contain transition group-hover:scale-[1.03]" /> : <Icon name="box" class="h-12 w-12 text-line" />}
+  </div>
+  <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">
+    {p.manufacturer && <span class="text-[11px] font-bold uppercase tracking-wider text-muted">{p.manufacturer}</span>}
+    <span class="line-clamp-3 text-[15px] font-semibold leading-snug group-hover:text-brand-deep">{p.name}</span>
+    {keySpecs.length > 0 && (
+      <ul class="space-y-0.5 text-xs text-muted">
+        {keySpecs.map((s) => <li class="line-clamp-1">{s.name}: <span class="text-ink-soft">{s.value}</span></li>)}
+      </ul>
+    )}
+    <div class="mt-auto flex items-end justify-between gap-2 pt-2">
+      <span>
+        {p.old_price && <span class="block text-xs text-muted line-through">{p.old_price}</span>}
+        <span class="text-lg font-extrabold tracking-tight">{p.price}</span>
+      </span>
+      <span class="grid h-9 w-9 place-items-center rounded-lg bg-ice text-brand-deep transition group-hover:bg-brand-deep group-hover:text-white"><Icon name="arrow" class="h-4 w-4" /></span>
+    </div>
+  </div>
+</a>

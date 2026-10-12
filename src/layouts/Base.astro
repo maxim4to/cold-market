@@ -1,0 +1,199 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { company, env, nav } from '../lib/site';
+import { topCategories } from '../lib/catalog';
+import { u, abs } from '../lib/url';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  image?: string | null;
+  jsonld?: object[];
+  ogType?: string;
+}
+const { title, description = '', canonical, image, jsonld = [], ogType = 'website' } = Astro.props;
+const path = canonical ?? Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') ?? '/';
+const canonicalUrl = abs(path || '/', Astro.site);
+const ogImage = abs(image || '/img/site/images/2021/02/12/logoxm.webp', Astro.site);
+const mainPhone = company.phones[0];
+
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  '@id': abs('/', Astro.site) + '#org',
+  name: company.name,
+  legalName: company.legalName,
+  url: abs('/', Astro.site),
+  logo: abs('/img/site/images/2021/02/12/logoxm.webp', Astro.site),
+  telephone: company.phones.map((p) => p.href.replace('tel:', '')),
+  email: company.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: company.address.street,
+    addressLocality: company.address.city,
+    addressRegion: company.address.region,
+    postalCode: company.address.postal,
+    addressCountry: 'RU',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: company.geo.lat, longitude: company.geo.lon },
+  openingHoursSpecification: [
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'], opens: '09:00', closes: '17:00' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Friday', opens: '09:00', closes: '16:30' },
+  ],
+  sameAs: [company.telegram.href],
+};
+const ld = [orgLd, ...jsonld];
+---
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {env.noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonicalUrl} />}
+    <meta name="theme-color" content="#062a45" />
+    <link rel="icon" href={u('/favicon.ico')} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content={company.name} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {ld.map((x) => <script type="application/ld+json" set:html={JSON.stringify(x)} />)}
+  </head>
+  <body class="flex min-h-screen flex-col pb-16 md:pb-0">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded focus:bg-white focus:p-2">К содержимому</a>
+
+    <div class="hidden bg-brand-night text-[13px] text-white/75 md:block">
+      <div class="container-x flex h-9 items-center justify-between gap-6">
+        <span class="flex items-center gap-2"><Icon name="pin" class="h-4 w-4 text-brand" />{company.address.full}</span>
+        <span class="flex items-center gap-2"><Icon name="clock" class="h-4 w-4 text-brand" />Пн–Чт 9:00–17:00, Пт 9:00–16:30</span>
+        <a href={`mailto:${company.email}`} data-goal="click_email" class="flex items-center gap-2 hover:text-white"><Icon name="mail" class="h-4 w-4 text-brand" />{company.email}</a>
+      </div>
+    </div>
+
+    <header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+      <div class="container-x flex h-16 items-center gap-4 md:h-20">
+        <a href={u('/')} class="flex shrink-0 items-center gap-2.5" aria-label="ХолодМаркет — на главную">
+          <span class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-brand-deep text-white shadow-sm"><Icon name="snow" class="h-6 w-6" /></span>
+          <span class="leading-tight">
+            <span class="block text-lg font-extrabold tracking-tight">Холод<span class="text-brand-deep">Маркет</span></span>
+            <span class="hidden text-[11px] font-medium text-muted sm:block">оборудование · монтаж · сервис</span>
+          </span>
+        </a>
+
+        <nav class="ml-6 hidden items-center gap-1 lg:flex" aria-label="Основное меню">
+          {nav.map((n) => <a href={u(n.href)} class="rounded-lg px-3 py-2 text-[15px] font-semibold text-ink-soft hover:bg-ice hover:text-ink">{n.label}</a>)}
+        </nav>
+
+        <div class="ml-auto flex items-center gap-2">
+          <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="hidden h-10 w-10 place-items-center rounded-xl bg-[#25d366] text-white hover:bg-[#1da851] sm:grid" aria-label="Написать в WhatsApp"><Icon name="whatsapp" /></a>
+          <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="hidden h-10 w-10 place-items-center rounded-xl bg-[#229ed9] text-white hover:bg-[#1a86b9] sm:grid" aria-label="Написать в Telegram"><Icon name="telegram" /></a>
+          <a href={mainPhone.href} data-goal="click_phone" class="hidden flex-col items-end pl-2 md:flex">
+            <span class="text-lg font-extrabold tracking-tight hover:text-brand-deep">{mainPhone.label}</span>
+            <span class="text-[11px] text-muted">звоните, подберём оборудование</span>
+          </a>
+
+          <details class="group relative lg:hidden">
+            <summary class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-xl border border-line [&::-webkit-details-marker]:hidden" aria-label="Меню">
+              <Icon name="menu" class="h-5 w-5 group-open:hidden" /><Icon name="close" class="hidden h-5 w-5 group-open:block" />
+            </summary>
+            <div class="fixed inset-x-0 top-16 bottom-0 overflow-y-auto border-t border-line bg-white p-4 pb-24">
+              <nav class="grid gap-1" aria-label="Мобильное меню">
+                {nav.map((n) => <a href={u(n.href)} class="rounded-lg px-3 py-3 text-base font-semibold hover:bg-ice">{n.label}</a>)}
+              </nav>
+              <p class="eyebrow mt-6 mb-2 px-3">Каталог</p>
+              <div class="grid gap-1">
+                {topCategories.map((c) => <a href={u(c.url)} class="rounded-lg px-3 py-2 text-[15px] text-ink-soft hover:bg-ice">{c.name}</a>)}
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-20 bg-brand-night text-white/75">
+      <div class="container-x grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <p class="text-lg font-extrabold text-white">ХолодМаркет</p>
+          <p class="mt-3 text-sm leading-relaxed">Продажа, монтаж, обслуживание и ремонт холодильного, торгового и технологического оборудования в Твери и Тверской области.</p>
+        </div>
+        <div>
+          <p class="mb-3 text-sm font-bold text-white">Каталог</p>
+          <ul class="grid gap-1.5 text-sm">
+            {topCategories.slice(0, 8).map((c) => <li><a href={u(c.url)} class="hover:text-white">{c.name}</a></li>)}
+          </ul>
+        </div>
+        <div>
+          <p class="mb-3 text-sm font-bold text-white">Компания</p>
+          <ul class="grid gap-1.5 text-sm">
+            {nav.slice(1).map((n) => <li><a href={u(n.href)} class="hover:text-white">{n.label}</a></li>)}
+            <li><a href={u('/services/to.html')} class="hover:text-white">Техобслуживание</a></li>
+            <li><a href={u('/services/ro.html')} class="hover:text-white">Ремонт оборудования</a></li>
+          </ul>
+        </div>
+        <div class="text-sm">
+          <p class="mb-3 font-bold text-white">Контакты</p>
+          {company.phones.map((p) => <a href={p.href} data-goal="click_phone" class="block text-base font-bold text-white hover:text-brand">{p.label}</a>)}
+          <a href={`mailto:${company.email}`} data-goal="click_email" class="mt-2 block hover:text-white">{company.email}</a>
+          <p class="mt-2">{company.address.full}</p>
+          <div class="mt-4 flex gap-2">
+            <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa px-3 py-2"><Icon name="whatsapp" class="h-4 w-4" />WhatsApp</a>
+            <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="btn-tg px-3 py-2"><Icon name="telegram" class="h-4 w-4" />Telegram</a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t border-white/10">
+        <p class="container-x py-5 text-xs leading-relaxed text-white/50">{company.priceNote}</p>
+        <p class="container-x pb-6 text-xs text-white/50">© {new Date().getFullYear()} {company.legalName}</p>
+      </div>
+    </footer>
+
+    <nav class="fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 border-t border-line bg-white/95 backdrop-blur md:hidden" aria-label="Связаться">
+      <a href={mainPhone.href} data-goal="click_phone" class="flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-brand-deep"><Icon name="phone" class="h-5 w-5" />Позвонить</a>
+      <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-[#1da851]"><Icon name="whatsapp" class="h-5 w-5" />WhatsApp</a>
+      <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold text-[#1a86b9]"><Icon name="telegram" class="h-5 w-5" />Telegram</a>
+    </nav>
+
+    {env.metrikaId && (
+      <script is:inline define:vars={{ id: Number(env.metrikaId) }}>
+        (function (m, e, t, r, i, k, a) {
+          m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+          m[i].l = 1 * new Date();
+          k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+        ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true, params: { site_version: 'v2' } });
+        document.addEventListener('click', function (e) {
+          var el = e.target.closest && e.target.closest('[data-goal]');
+          if (el) ym(id, 'reachGoal', el.getAttribute('data-goal'));
+        });
+        window.jivo_onMessageSent = function () { ym(id, 'reachGoal', 'jivo_message'); };
+        window.jivo_onChangeState = function (s) { if (s === 'chat') ym(id, 'reachGoal', 'jivo_open'); };
+      </script>
+    )}
+    {env.jivoId && (
+      <script is:inline define:vars={{ jivoId: env.jivoId }}>
+        // Jivo is heavy: load it on first interaction or after 6 s so it doesn't hurt page speed
+        (function () {
+          var done = false;
+          function load() {
+            if (done) return; done = true;
+            var s = document.createElement('script'); s.async = true; s.src = '//code.jivo.ru/widget/' + jivoId;
+            document.body.appendChild(s);
+          }
+          ['scroll', 'pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { addEventListener(ev, load, { once: true, passive: true }); });
+          setTimeout(load, 6000);
+        })();
+      </script>
+    )}
+  </body>
+</html>

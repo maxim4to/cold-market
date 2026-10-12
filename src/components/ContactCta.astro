@@ -1,0 +1,17 @@
+---
+import Icon from './Icon.astro';
+import { company } from '../lib/site';
+interface Props { title?: string; text?: string; compact?: boolean }
+const { title = 'Уточните наличие и цену', text = 'Менеджер подскажет актуальную цену, наличие на складе, сроки доставки и монтажа.', compact = false } = Astro.props;
+const phone = company.phones[0];
+---
+<div class={`rounded-2xl bg-gradient-to-br from-brand-night to-[#0b3b5e] text-white ${compact ? 'p-5' : 'p-6 md:p-8'}`}>
+  <p class="text-lg font-extrabold">{title}</p>
+  <p class="mt-1.5 text-sm text-white/70">{text}</p>
+  <a href={phone.href} data-goal="click_phone" class="mt-4 flex items-center gap-2 text-2xl font-extrabold tracking-tight hover:text-brand"><Icon name="phone" class="h-6 w-6 text-brand" />{phone.label}</a>
+  <div class="mt-4 flex flex-wrap gap-2">
+    <a href={company.whatsapp.href} data-goal="click_whatsapp" target="_blank" rel="noopener" class="btn-wa"><Icon name="whatsapp" class="h-4 w-4" />WhatsApp</a>
+    <a href={company.telegram.href} data-goal="click_telegram" target="_blank" rel="noopener" class="btn-tg"><Icon name="telegram" class="h-4 w-4" />Telegram</a>
+    <a href={`mailto:${company.email}`} data-goal="click_email" class="btn border border-white/20 text-white hover:bg-white/10"><Icon name="mail" class="h-4 w-4" />E-mail</a>
+  </div>
+</div>
