@@ -5,7 +5,7 @@ OUT=sys.argv[1]; BASE="https://coldmarket-tver.ru"
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 ctx=ssl.create_default_context(cafile="/root/.ccr/ca-bundle.crt")
 SKIP=re.compile(r'\.(jpg|jpeg|png|gif|webp|svg|ico|css|js|pdf|zip|doc|docx|xls|xlsx|mp4|woff2?|ttf)(\?|$)',re.I)
-BAD=re.compile(r'(task=|/cart|/user|/login|/wishlist|korzina|format=|print=|tmpl=|orderby|order=|/search|/checkout|add_to_cart|/register|/vendor)',re.I)
+BAD=re.compile(r'(task=|/cart|/user|/login|/wishlist|/korzina/|/korzina\.html|format=|print=|tmpl=|orderby|order=|/search|/checkout|add_to_cart|/register|/vendor)',re.I)
 class P(HTMLParser):
     def __init__(s): super().__init__(); s.l=[]
     def handle_starttag(s,t,a):

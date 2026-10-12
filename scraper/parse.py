@@ -24,7 +24,7 @@ products, categories, pages = {}, {}, {}
 listing = {}  # product path -> data seen in category listings (labels, list price)
 
 for url, v in idx.items():
-    if not v.get('file') or 'korzina' in url:
+    if not v.get('file') or re.search(r'/korzina(/|\.html)', url):
         continue
     raw = open(os.path.join(D, v['file']), encoding='utf-8', errors='replace').read()
     soup = BeautifulSoup(raw, 'lxml')
